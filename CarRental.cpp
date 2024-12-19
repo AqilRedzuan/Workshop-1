@@ -983,7 +983,7 @@ void UpdateCar() {
         cout << setw(18) << ""; cout << "------------------------------------------------------------------------------------------\n";
         //data show in box
         cout << setw(18) << "";
-        printf("| %-3s | %-20s | %-20s | %-15s | %-15s | %-15s | \n", "ID", "Car Brand", "Car Name", "Plate", "Price Per Hour", "Status");
+        printf("| %-3s | %-13s | %-15s | %-11s | %-15s | %-15s | \n", "ID", "Car Brand", "Car Name", "Plate", "Price Per Hour", "Status");
         cout << setw(18) << ""; cout << "------------------------------------------------------------------------------------------\n";
 
         while ((row = mysql_fetch_row(res)))
@@ -991,7 +991,7 @@ void UpdateCar() {
 
 
             cout << setw(18) << "";
-            printf("| %-5s | %-20s | %-20s | %-15s | %-15s | %-15s |\n", row[0], row[1], row[2], row[3], row[4], row[5]);
+            printf("| %-3s | %-13s | %-15s | %-11s | %-15s | %-15s |\n", row[0], row[1], row[2], row[3], row[4], row[5]);
             cout << setw(18) << ""; cout << "------------------------------------------------------------------------------------------\n";
         }
         cout << endl << endl << setw(73) << "  Choose ID : ";
@@ -1012,13 +1012,16 @@ void UpdateCar() {
             while ((row = mysql_fetch_row(res)))
             {
                 system("cls");
+                std::string filePath = "admin.txt"; // Path to the admin file
+                welcomeHeader(filePath);
 
+                cout << "\n";
                 cout << setw(82) << "---------------------------------------" << endl;
-                cout << setw(55) << "Car Brand:" << row[1] << endl;
-                cout << setw(56) << "Car Name :" << row[2] << endl;
-                cout << setw(55) << "Plate :" << row[3] << endl;
-                cout << setw(55) << "Price Per Hour:" << row[4] << endl;
-                cout << setw(55) << "Status:" << row[5] << endl;
+                cout << setw(60) << "Car Brand: " << row[1] << endl;
+                cout << setw(59) << "Car Name: " << row[2] << endl;
+                cout << setw(56) << "Plate: " << row[3] << endl;
+                cout << setw(65) << "Price Per Hour: " << row[4] << endl;
+                cout << setw(57) << "Status: " << row[5] << endl;
                 cout << setw(82) << "---------------------------------------" << endl << endl;
             }
         }
@@ -1028,20 +1031,20 @@ void UpdateCar() {
             system("pause");
         }
 
-        cout << setw(71) << "1. Car Brand\n\n";
-        cout << setw(72) << "2. Car Name\n\n";
-        cout << setw(71) << "3. Plate\n\n";
+        cout << setw(66) << "1. Car Brand\n\n";
+        cout << setw(65) << "2. Car Name\n\n";
+        cout << setw(62) << "3. Plate\n\n";
         cout << setw(71) << "4. Price Per Hour\n\n";
-        cout << setw(71) << "5. Status\n\n";
-        cout << setw(65) << "6. Back\n\n";
+        cout << setw(63) << "5. Status\n\n";
+        cout << setw(61) << "6. Back\n\n";
         cout << setw(86) << "-------------------------------------------\n" << endl;
-        cout << setw(78) << "Please Enter Your Choice : ";
+        cout << setw(70) << "Please Enter Your Choice : ";
         cin >> choose;
 
         cin.ignore(1, '\n');
         if (choose == 1)
         {
-            cout << endl << endl << setw(75) << "1. Car Brand: ";
+            cout << endl << endl << setw(66) << "1. Car Brand: ";
             getline(cin, c_data);
             string update_query = "update car set Brand ='" + c_data + "' where CarID='" + CarID + "'";
             const char* q = update_query.c_str();
@@ -1049,7 +1052,7 @@ void UpdateCar() {
         }
         else if (choose == 2)
         {
-            cout << endl << endl << setw(75) << "2. Car Name: ";
+            cout << endl << endl << setw(65) << "2. Car Name: ";
             getline(cin, c_data);
             string update_query = "update car set CarName='" + c_data + "' where CarID='" + CarID + "'";
             const char* q = update_query.c_str();
@@ -1057,7 +1060,7 @@ void UpdateCar() {
         }
         else if (choose == 3)
         {
-            cout << endl << endl << setw(75) << "3. Plate: ";
+            cout << endl << endl << setw(62) << "3. Plate: ";
             getline(cin, c_data);
             string update_query = "update car set Plate='" + c_data + "' where CarID='" + CarID + "'";
             const char* q = update_query.c_str();
@@ -1065,7 +1068,7 @@ void UpdateCar() {
         }
         else if (choose == 4)
         {
-            cout << endl << endl << setw(75) << "4. Price Per Hour: ";
+            cout << endl << endl << setw(71) << "4. Price Per Hour: ";
             getline(cin, c_data);
             string update_query = "update car set PricePerHour='" + c_data + "' where CarID='" + CarID + "'";
             const char* q = update_query.c_str();
@@ -1073,7 +1076,7 @@ void UpdateCar() {
         }
         else  if (choose == 5)
         {
-            cout << endl << endl << setw(75) << "5. Status: ";
+            cout << endl << endl << setw(63) << "5. Status: ";
             getline(cin, c_data);
             string update_query = "update car set Status='" + c_data + "' where CarID='" + CarID + "'";
             const char* q = update_query.c_str();
@@ -1114,18 +1117,18 @@ void DeleteCar() {
         res = mysql_store_result(conn);
 
         cout << "\n";
-        cout << setw(99) << "-------------------------------------------------------------------------\n";
+        cout << setw(18) << ""; cout << "------------------------------------------------------------------------------------------\n";
         //data show in box
         cout << setw(25) << "";
-        printf("| %-3s | %-20s | %-20s | %-15s | %-15s | %-15s | \n", "ID", "Car Brand", "Car Name", "Plate", "Price Per Hour", "Status");
-        cout << setw(99) << "-------------------------------------------------------------------------\n";
+        printf("| %-3s | %-13s | %-15s | %-11s | %-15s | %-15s | \n", "ID", "Car Brand", "Car Name", "Plate", "Price Per Hour", "Status");
+        cout << setw(18) << ""; cout << "------------------------------------------------------------------------------------------\n";
 
         while ((row = mysql_fetch_row(res)))
         {
 
-            cout << setw(25) << "";
-            printf("| %-5s | %-20s | %-20s | %-15s | %-15s | %-15s |\n", row[0], row[1], row[2], row[3], row[4], row[5]);
-            cout << setw(99) << "-------------------------------------------------------------------------\n";
+        cout << setw(25) << "";
+        printf("| %-3s | %-13s | %-15s | %-11s | %-15s | %-15s |\n", row[0], row[1], row[2], row[3], row[4], row[5]);
+        cout << setw(18) << ""; cout << "------------------------------------------------------------------------------------------\n";
         }
 
         cout << endl << endl << setw(70) << "Enter ID to delete: ";
@@ -1207,14 +1210,14 @@ void ListCar() {
         cout << setw(109) << "---------------------------------------------------------------------------------------------\n";
         //data show in box
         cout << setw(15) << "";
-        printf("| %-3s | %-20s | %-20s | %-15s | %-15s | %-15s | \n", "ID", "Car Brand", "Car Name", "Plate", "Price Per Hour", "Status");
+        printf("| %-3s | %-13s | %-15s | %-11s | %-15s | %-15s | \n", "ID", "Car Brand", "Car Name", "Plate", "Price Per Hour", "Status");
         cout << setw(109) << "---------------------------------------------------------------------------------------------\n";
 
         while ((row = mysql_fetch_row(res)))
         {
 
             cout << setw(15) << "";
-            printf("| %-5s | %-20s | %-20s | %-15s | %-15s | %-15s |\n", row[0], row[1], row[2], row[3], row[4], row[5]);
+            printf("| %-3s | %-13s | %-15s | %-11s | %-15s | %-15s |\n", row[0], row[1], row[2], row[3], row[4], row[5]);
             cout << setw(109) << "---------------------------------------------------------------------------------------------\n";
         }
 
@@ -1238,6 +1241,7 @@ void SearchCar() {
     char choose;
     string name;
 
+    cout << "\n";
     cin.ignore(1, '\n');
     cout << setw(71) << "Search Car by name: ";
     getline(cin, name);
@@ -1254,7 +1258,7 @@ void SearchCar() {
         cout << setw(99) << "-------------------------------------------------------------------------\n";
         //data show in box
         cout << setw(25) << "";
-        printf("| %-3s | %-20s | %-20s | %-15s | %-15s | %-15s | \n", "ID", "Car Brand", "Car Name", "Plate", "Price Per Hour", "Status");
+        printf("| %-3s | %-13s | %-15s | %-11s | %-15s | %-15s | \n", "ID", "Car Brand", "Car Name", "Plate", "Price Per Hour", "Status");
         cout << setw(99) << "-------------------------------------------------------------------------\n";
 
         while ((row = mysql_fetch_row(res)))
@@ -1262,7 +1266,7 @@ void SearchCar() {
 
 
             cout << setw(25) << "";
-            printf("| %-5s | %-20s | %-20s | %-15s | %-15s | %-15s |\n", row[0], row[1], row[2], row[3], row[4], row[5]);
+            printf("| %-3s | %-13s | %-15s | %-11s | %-15s | %-15s |\n", row[0], row[1], row[2], row[3], row[4], row[5]);
             cout << setw(99) << "-------------------------------------------------------------------------\n";
         }
 
@@ -1621,6 +1625,7 @@ void SearchCust() {
     char choose;
     string name;
 
+    cout << "\n";
     cin.ignore(1, '\n');
     cout << setw(24) << "";
     cout << setw(24) << "Search Customer by name: ";
