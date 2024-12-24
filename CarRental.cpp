@@ -215,13 +215,13 @@ int main() {
     header();
     std::string filePath = "header.txt"; // Path to the welcome file
     welcomeHeader(filePath);
-    cout << setw(79) << "              Welcome To Car Rental Management System\n\n\n";
-    cout << setw(69) << "1. Admin\n\n\n";
-    cout << setw(69) << "2. Staff\n\n\n";
-    cout << setw(72) << "3. Customer\n\n\n";
-    cout << setw(69) << "4. Exit\n\n\n\n";
-    cout << setw(87) << "----------------------------------------------\n" << endl;
-    cout << setw(75) << "Please Enter Your Choice : ";
+    cout << setw(83) << "Welcome To Car Rental Management System\n\n\n";
+    cout << setw(64) << "1. Admin\n\n\n";
+    cout << setw(64) << "2. Staff\n\n\n";
+    cout << setw(67) << "3. Customer\n\n\n";
+    cout << setw(64) << "4. Exit\n\n\n\n";
+    cout << setw(81) << "----------------------------------------------\n" << endl;
+    cout << setw(71) << "Please Enter Your Choice : ";
     cin >> mainmenu;
 
     std::string answer;
@@ -350,7 +350,7 @@ void AdminMenu()
     welcomeHeader(filePath);
     cout << "\n\n\n";
     cout << setw(58) << "1. Staff\n\n";
-    cout << setw(56) << "2. Category\n\n";
+    cout << setw(61) << "2. Category\n\n";
     cout << setw(56) << "3. Car\n\n";
     cout << setw(61) << "4. Customer\n\n";
     cout << setw(61) << "5. Rent Car\n\n";
@@ -406,15 +406,16 @@ void StaffMenu() {
     system("cls");
     std::string filePath = "admin.txt"; // Path to the admin file
     welcomeHeader(filePath);
+    cout << "\n\n";
     cout << setw(200) << " " << endl;
-    cout << setw(74) << "1. Register Staff\n\n";
-    cout << setw(72) << "2. Update Staff\n\n";
-    cout << setw(72) << "3. Delete Staff\n\n";
-    cout << setw(73) << "4. Display Staff\n\n";
-    cout << setw(72) << "5. Search Staff\n\n";
-    cout << setw(65) << "6. Back\n\n\n";
-    cout << setw(86) << "-------------------------------------------\n" << endl;
-    cout << setw(76) << "Please Enter Your Choice : ";
+    cout << setw(67) << "1. Register Staff\n\n";
+    cout << setw(65) << "2. Update Staff\n\n";
+    cout << setw(65) << "3. Delete Staff\n\n";
+    cout << setw(66) << "4. Display Staff\n\n";
+    cout << setw(65) << "5. Search Staff\n\n";
+    cout << setw(58) << "6. Back\n\n\n";
+    cout << setw(79) << "-------------------------------------------\n" << endl;
+    cout << setw(69) << "Please Enter Your Choice : ";
     cin >> choose;
 
     if (choose == 1)
@@ -1056,8 +1057,9 @@ void AddCar() {
     qstate = mysql_query(conn, "SELECT * FROM carcat");
 
     std::cout << "\n\n\n";
-    cout << setw(30) << "";
-    table(); 
+    cout << setw(40) << "";
+    table();
+    
 
     cout << "\n\n" << setw(68) << "Car Category: ";
     cin.ignore(1, '\n');
@@ -2193,10 +2195,17 @@ void StaffLogin() {
 
     cout << "\n\n" << setw(63) << "Password: ";
     char ch;
-    while ((ch = _getch()) != 13)
-    {
-        staffpassword += ch;
-        cout << '*';
+    while ((ch = _getch()) != '\r') {
+        if (ch == 8) {
+            if (!staffpassword.empty()) {
+                staffpassword.pop_back();
+                cout << "\b \b";
+            }
+        }
+        else {
+            staffpassword.push_back(ch);
+            cout << '*';
+        }
     }
 
     // Validate password input
@@ -2249,12 +2258,12 @@ void StaffPage() {
     std::string filePath = "staff.txt"; // Path to the admin file
     welcomeHeader(filePath);
 
-    cout << "                Login as:" << StaffName << "\n\n";
-    cout << setw(71) << "1. Manage Customer\n\n" << endl;
-    cout << setw(68) << "2. Manage Car\n\n" << endl;
-    cout << setw(61) << "3. Logout" << endl;
-    cout << setw(83) << "      -----------------------------------------\n" << endl;
-    cout << setw(75) << "Please Enter Your Choice : ";
+    cout << setw(55) << " Login as: " << StaffName << "\n\n\n";
+    cout << setw(65) << "1. Manage Customer\n\n" << endl;
+    cout << setw(60) << "2. Manage Car\n\n" << endl;
+    cout << setw(56) << "3. Logout\n\n" << endl;
+    cout << setw(79) << "-----------------------------------------\n" << endl;
+    cout << setw(70) << "Please Enter Your Choice : ";
     cin >> menu;
 
     switch (menu)
@@ -2277,18 +2286,17 @@ void CustMenu() {
     
     int choose;
     system("cls");
-    cout << setw(1000) << " " << endl;
     std::string filePath = "staff.txt"; // Path to the admin file
     welcomeHeader(filePath);
 
-    cout << setw(74) << "1. Register Customer\n\n";
-    cout << setw(72) << "2. Update Customer\n\n";
-    cout << setw(72) << "3. Delete Customer\n\n";
-    cout << setw(73) << "4. Display Customer\n\n";
-    cout << setw(72) << "5. Search Customer\n\n";
-    cout << setw(63) << "6. Back\n\n\n";
-    cout << setw(86) << "-------------------------------------------\n" << endl;
-    cout << setw(77) << "Please Enter Your Choice : ";
+    cout << setw(67) << "1. Register Customer\n\n";
+    cout << setw(65) << "2. Update Customer\n\n";
+    cout << setw(65) << "3. Delete Customer\n\n";
+    cout << setw(66) << "4. Display Customer\n\n";
+    cout << setw(65) << "5. Search Customer\n\n";
+    cout << setw(55) << "6. Back\n\n\n";
+    cout << setw(79) << "-------------------------------------------\n" << endl;
+    cout << setw(70) << "Please Enter Your Choice : ";
     cin >> choose;
 
     if (choose == 1)
@@ -2692,7 +2700,6 @@ void MenuCar() {
     std::string filePath = "staff.txt"; // Path to the admin file
     welcomeHeader(filePath);
 
-    cout << setw(300) << " " << endl;
     cout << setw(61) << "1. Update Car\n\n";
     cout << setw(61) << "2. Delete Car\n\n";
     cout << setw(62) << "3. Display Car\n\n";
@@ -3065,10 +3072,9 @@ void table() {
     }
     printf("\n\n");
 
-
     // Print table data
     for (const auto& row : data) {
-        for (int i = 0; i < col_count; ++i) {
+        for (int i = 0; i < col_count; ++i) { 
             printf("      | %-*s ", max_widths[i] + 2, row[i].c_str());
         }
         printf("|\n");
