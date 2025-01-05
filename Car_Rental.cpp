@@ -14,6 +14,7 @@
 #include <sstream>
 #include <algorithm>
 #include <windows.h> // For console functions
+#include "Header.h"
 
 using namespace std;
 
@@ -88,6 +89,8 @@ void CustLogin();
 void CustPage();
 void RentalInCustomer();
 void DisplayRental();
+
+void Report();
 
 //just empty table
 void table();
@@ -408,7 +411,7 @@ void AdminMenu()
         break;
 
     case 6:
-        // ReportMenu();
+        Report();
         break;
 
     case 7:
@@ -1880,7 +1883,7 @@ void RegCust() {
     string Phone = "";
     string Email = "";
 
-    cout << "\n\n" << setw(62) << "Enter Name  : ";
+    cout << "\n\n" << setw(62) << "Enter Name : ";
     cin.ignore(1, '\n');
     getline(cin, Name);
     Phone = getInputOfLength(10, "\n\t\t\t\t\tPhone number must be 10 digits long.", "\n\t\t\t\t\t\tEnter Phone : ");
@@ -2411,18 +2414,18 @@ void RentalInAdmin() {
             res = mysql_store_result(conn);
 
             cout << "\n";
-            cout << setw(107) << "-----------------------------------------------------------------------------------------------\n";
+            cout << setw(109) << "-----------------------------------------------------------------------------------------------\n";
             //data show in box
-            cout << setw(11) << "";
+            cout << setw(13) << "";
             printf("| %-4s | %-10s | %-13s | %-15s | %-15s | %-19s | \n", "ID", "Car Brand", "Model", "Plate", "Price", "Status");
-            cout << setw(107) << "-----------------------------------------------------------------------------------------------\n";
+            cout << setw(109) << "-----------------------------------------------------------------------------------------------\n";
 
             while ((row = mysql_fetch_row(res)))
             {
 
-                cout << setw(11) << "";
+                cout << setw(13) << "";
                 printf("| %-4s | %-10s | %-13s | %-15s | %-15s | %-19s | \n", row[0], row[5], row[6], row[1], row[2], row[3]);
-                cout << setw(107) << "-----------------------------------------------------------------------------------------------\n";
+                cout << setw(109) << "-----------------------------------------------------------------------------------------------\n";
             }
 
             cout << "\n\n" << setw(64) << "Choose Car ID: ";
@@ -2461,8 +2464,9 @@ void RentalInAdmin() {
             printf("\n\n");
 
             if (!isAvailable) {
-                std::cout << std::setw(77) << "The selected car is currently rented. Please pick another car." << std::endl;
-                std::cout << std::setw(77) << "Press Enter to continue..." << std::endl;
+                std::cout << std::setw(86) << "The selected car is currently rented. Please pick another car." << std::endl;
+                std::cout << "\n";
+                std::cout << std::setw(72) << "Press Enter to continue..." << std::endl;
 
                 // Clear input buffer and wait for Enter key
                 //std::cin.ignore();  // Clear up to 1000 characters or until a newline is encountered
@@ -2476,9 +2480,9 @@ void RentalInAdmin() {
             //rest of the code for rental calculations and display ...
             if (isAvailable) {
                 // Prompt for rental and return dates
-                std::cout << setw(77) << "Enter Rental Date (YYYY-MM-DD): ";
+                std::cout << setw(75) << "Enter Rental Date (YYYY-MM-DD): ";
                 std::cin >> rentalDateStr;
-                std::cout << "\n" << std::setw(77) << "Enter Return Date (YYYY-MM-DD): ";
+                std::cout << "\n" << std::setw(75) << "Enter Return Date (YYYY-MM-DD): ";
                 std::cin >> returnDateStr;
 
                 // Convert dates and times to tm structs
@@ -2497,6 +2501,7 @@ void RentalInAdmin() {
                 // Validate the dates
                 if (!isDateValid(rentalDate, returnDate)) {
                     char choose;
+                    std::cout << "\n";
                     cerr << setw(77) << "Error: Invalid dates entered. Ensure the rental date is today or later, and the return date is after the rental date." << endl;
                     cout << endl << setw(78) << "Do you want to try again ? (y/n): ";
                     cin >> choose;
@@ -2534,26 +2539,26 @@ void RentalInAdmin() {
                 system("cls");
                 std::string filePath = "rent.txt"; // Path to the admin file
                 welcomeHeader(filePath);
-                int nameWidth = custName.length() > 18 ? custName.length() + 1 : 18;
-
-                std::cout << std::setw(82) << "     |-------------------------------------------------------|" << std::endl;
-                std::cout << std::setw(82) << "     |                  Car Rental Details                   |" << std::endl;
-                std::cout << std::setw(83) << "     |-------------------------------------------------------|\n" << std::endl;
-                std::cout << std::setw(49) << " Customer Name:    " << std::setw(nameWidth) << custName << "\n" << std::endl;
-                std::cout << std::setw(42) << " Car Brand: " << std::setw(27) << CarBrand << "\n" << std::endl;
-                std::cout << std::setw(49) << " Car Plate Number: " << std::setw(23) << Plate << "\n" << std::endl;
-                std::cout << std::setw(49) << " Rental Date:      " << std::setw(25) << rentalDateStr << "\n" << std::endl;
-                std::cout << std::setw(48) << " Return Date:     " << std::setw(26) << returnDateStr << "\n" << std::endl;
-                std::cout << std::setw(51) << " Total Price: RM     " << std::setw(16) << totalPrice << "\n" << std::endl;
+                std::cout << "\n\n";
+                std::cout << std::setw(89) << "     |-------------------------------------------------------|" << std::endl;
+                std::cout << std::setw(89) << "     |                  Car Rental Details                   |" << std::endl;
+                std::cout << std::setw(90) << "     |-------------------------------------------------------|\n" << std::endl;
+                std::cout << std::setw(56) << " Customer Name:    " << std::setw(21) << custName << "\n" << std::endl;
+                std::cout << std::setw(49) << " Car Brand: " << std::setw(28) << CarBrand << "\n" << std::endl;
+                std::cout << std::setw(56) << " Car Plate Number: " << std::setw(23) << Plate << "\n" << std::endl;
+                std::cout << std::setw(56) << " Rental Date:      " << std::setw(26) << rentalDateStr << "\n" << std::endl;
+                std::cout << std::setw(55) << " Return Date:     " << std::setw(27) << returnDateStr << "\n" << std::endl;
+                std::cout << std::setw(75) << " Total Price:                      RM " << std::setw(5) << totalPrice << "\n" << std::endl;
 
                 if (totalDays >= 3) {
-                    std::cout << std::setw(63) << " Total price (with 10% discount):  RM"
-                        << std::setw(static_cast<std::streamsize>(nameWidth) - 2) << discountedPrice << "\n" << std::endl;
+                    std::cout << std::setw(74) << " Total price (with 10% discount):  RM"
+                        << std::setw(static_cast<std::streamsize>(8) - 2) << discountedPrice << "\n" << std::endl;
                 }
 
-                std::cout << std::setw(82) << "   |-------------------------------------------------------|" << std::endl;
+                std::cout << std::setw(89) << "   |-------------------------------------------------------|" << std::endl;
                 // Prompt for rental confirmation
-                std::cout << std::setw(76) << "\n                                            Confirm Rental (y/n): ";
+                cout << "\n";
+                std::cout << std::setw(73) << "Confirm Rental (y/n): ";
                 char confirm;
                 std::cin >> confirm;
 
@@ -2593,19 +2598,24 @@ void RentalInAdmin() {
                             std::string filePath = "rent.txt"; // Path to the admin file
                             welcomeHeader(filePath);
 
-                            std::cout << std::setw(76) << "\n                                            Transaction Details:";
-                            cout << "\n\n";
-                            cout << setw(25) << "" << "----------------------------------------------------------\n";
-                            cout << "\n";
-                            std::cout << std::setw(42) << " Rental ID: " << std::setw(24) << rentalID << "\n" << std::endl;
-                            std::cout << std::setw(46) << " Customer Name: " << std::setw(21) << custName << "\n" << std::endl;
-                            std::cout << std::setw(42) << " Car Brand: " << std::setw(27) << brand << "\n" << std::endl;
-                            std::cout << std::setw(42) << " Car Plate: " << std::setw(30) << carPlate << "\n" << std::endl;
-                            std::cout << std::setw(44) << " Rental Date: " << std::setw(30) << rental_date << "\n" << std::endl;
-                            std::cout << std::setw(44) << " Return Date: " << std::setw(30) << return_date << "\n" << std::endl;
-                            std::cout << std::setw(47) << " Total Price: RM " << std::setw(20) << totalPrice << "\n" << std::endl;
-                            cout << setw(25) << "" << "----------------------------------------------------------\n";
+                            std::cout << "\n\n";
+                            std::cout << std::setw(89) << "     |-------------------------------------------------------|" << std::endl;
+                            std::cout << std::setw(89) << "     |                  Transaction Details                  |" << std::endl;
+                            std::cout << std::setw(90) << "     |-------------------------------------------------------|\n" << std::endl;
+                            std::cout << std::setw(56) << " Customer Name:    " << std::setw(24) << custName << "\n" << std::endl;
+                            std::cout << std::setw(49) << " Car Brand: " << std::setw(30) << CarBrand << "\n" << std::endl;
+                            std::cout << std::setw(56) << " Car Plate Number: " << std::setw(24) << Plate << "\n" << std::endl;
+                            std::cout << std::setw(56) << " Rental Date:      " << std::setw(26) << rentalDateStr << "\n" << std::endl;
+                            std::cout << std::setw(55) << " Return Date:     " << std::setw(27) << returnDateStr << "\n" << std::endl;
+                            std::cout << std::setw(75) << " Total Price:                      RM " << std::setw(5) << totalPrice << "\n" << std::endl;
+
+                            if (totalDays >= 3) {
+                                std::cout << std::setw(74) << " Total price (with 10% discount):  RM"
+                                    << std::setw(static_cast<std::streamsize>(8) - 2) << discountedPrice << "\n" << std::endl;
+                            }
+                            std::cout << std::setw(89) << "   |-------------------------------------------------------|" << std::endl;
                         }
+
                         else {
                             std::cerr << "Error fetching transaction" << std::endl;
                             mysql_close(conn);
@@ -2613,7 +2623,7 @@ void RentalInAdmin() {
                         }
                         mysql_free_result(res);
                         cout << "\n";
-                        cout << setw(71) << "Update the car status ? (y/n): ";
+                        cout << setw(75) << "Update the car status ? (y/n): ";
                         char option;
                         cin >> option;
 
@@ -2624,7 +2634,7 @@ void RentalInAdmin() {
                         else
                         {
 
-                            AdminMenu();
+                            RentalMenu();
                         }
                     }
                 }
@@ -2678,11 +2688,15 @@ void UpdateRentalA() {
 
     if (validRental) {
         // Display options for rent status
-        std::cout << "\n\n" << std::setw(60) << "Choose New Rent Status:\n";
-        std::cout << "1. Approved\n";
-        std::cout << "2. Returned\n";
-        std::cout << "3. Pending\n";
-        std::cout << std::setw(60) << "Enter your choice (1-3): ";
+        std::cout << "\n" << std::setw(72) << "Choose New Rent Status:\n";
+        std::cout << "\n\n";
+        std::cout << std::setw(69) << "1. Approved\n";
+        std::cout << "\n";
+        std::cout << std::setw(69) << "2. Returned\n";
+        std::cout << "\n";
+        std::cout << std::setw(68) << "3. Pending\n";
+        std::cout << "\n\n";
+        std::cout << std::setw(73) << "Enter your choice (1-3): ";
 
         int choice;
         std::cin >> choice;
@@ -2711,12 +2725,13 @@ void UpdateRentalA() {
             std::cerr << "Error updating rent status: " << mysql_error(conn) << std::endl;
         }
         else {
-            std::cout << std::setw(70) << "Rental status updated successfully to: " << rentStatus << std::endl;
+            std::cout << "\n";
+            std::cout << std::setw(73) << "Rental status updated successfully to: " << rentStatus << std::endl;
         }
 
         // Ask if the admin wants to return to the admin menu
         char backChoice;
-        std::cout << "\nDo you want to go back to the Rental Menu? (y/n): ";
+        std::cout << "\n" << std::setw(84) << "Do you want to go back to the Rental Menu? (y/n): ";
         std::cin >> backChoice;
 
         if (backChoice == 'y' || backChoice == 'Y') {
@@ -2724,7 +2739,7 @@ void UpdateRentalA() {
         }
         else {
             std::cout << "Thank you for using the admin system. Exiting now..." << std::endl;
-            exit(0);  // Or use return to exit gracefully
+            UpdateRentalA();  // Or use return to exit gracefully
         }
     }
     else {
@@ -2753,17 +2768,17 @@ void  DeleteRental() {
         res = mysql_store_result(conn);
 
         cout << "\n\n";
-        cout << setw(107) << "---------------------------------------------------------------------------------------------\n";
+        cout << setw(111) << "------------------------------------------------------------------------------------------------------\n";
         //data show in box
-        cout << setw(13) << "";
-        printf("|%-9s | %-5s | %-5s | %-10s | %-10s | %-10s | %-10s |\n", "Rental ID", "Car ID",  "Customer ID" , "Rental Date", "Return Date", "Total Price", "Rental Status");
-        cout << setw(107) << "---------------------------------------------------------------------------------------------\n";
+        cout << setw(8) << "";
+        printf("| %-9s | %-6s | %-11s | %-12s | %-15s | %-15s | %-13s |\n", "Rental ID", "Car ID",  "Customer ID" , "Rental Date", "Return Date", "Total Price", "Rental Status");
+        cout << setw(111) << "------------------------------------------------------------------------------------------------------\n";
 
         while ((row = mysql_fetch_row(res)))
         {
-            cout << setw(13) << "";
-            printf("|%-9s | %-5s | %-5s | %-10s | %-10s | %-10s | %-10s |\n", row[0], row[1], row[2], row[3], row[4], row[5], row[6]);
-            cout << setw(107) << "--------------------------------------------------------------------------------------\n";
+            cout << setw(8) << "";
+            printf("| %-9s | %-6s | %-11s | %-12s | %-15s | %-15s | %-13s |\n", row[0], row[1], row[2], row[3], row[4], row[5], row[6]);
+            cout << setw(111) << "----------------------------------------------------------------------------------------------------------------------------\n";
         }
         cout << endl << endl << setw(72) << "  Choose Customer ID : ";
         cin >> ID;
@@ -2794,7 +2809,7 @@ void  DeleteRental() {
             qstate = mysql_query(conn, qd);
             if (!qstate)
             {
-                cout << endl << setw(35) << "         Successfully deleted from Rent record" << endl;
+                cout << endl << setw(80) << "Successfully deleted from Rent record" << endl;
             }
             else
             {
@@ -2804,7 +2819,7 @@ void  DeleteRental() {
 
         else
         {
-            cout << endl << setw(35) << "             Please Enter a valid ID.Do You Want To Try Again? (y/n): ";
+            cout << endl << setw(87) << "Please Enter a valid ID.Do You Want To Try Again? (y/n): ";
             cin >> choose;
             if (choose == 'y' || choose == 'Y')
             {
@@ -2815,7 +2830,7 @@ void  DeleteRental() {
                 RentalMenu();
             }
         }
-        cout << endl << setw(35) << "         Do you want to delete another student?(y|n): ";
+        cout << endl << setw(88) << "Do you want to delete another Customer ? (y/n): ";
         cin >> choose;
 
         if (choose == 'y' || choose == 'Y')
@@ -2824,7 +2839,7 @@ void  DeleteRental() {
         }
         else
         {
-            //RentedList();
+            RentalMenu();
         }
     }
 }
@@ -2836,56 +2851,82 @@ void ReturnCar() {
     std::string filePath = "rent.txt"; // Path to the admin file
     welcomeHeader(filePath);
 
-    qstate = mysql_query(conn, "SELECT rent.RentID,  car.CarID, carcat.CarBrand, car.Plate, rent.Rent_Date, rent.Return_Date, rent.Rent_Status FROM carcat JOIN car ON carcat.CatID = car.CatID JOIN rent ON car.CarID = rent.CarID");
+    qstate = mysql_query(conn, "SELECT rent.RentID, car.CarID, rent.CustID, carcat.CarBrand, car.Plate, rent.Rent_Date, rent.Return_Date, rent.Rent_Status FROM carcat JOIN car ON carcat.CatID = car.CatID JOIN rent ON car.CarID = rent.CarID");
 
-    if (!qstate)
-    {
-
+    if (!qstate) {
         res = mysql_store_result(conn);
 
         cout << "\n\n";
-        cout << setw(107) << "---------------------------------------------------------------------------------------------\n";
-        //data show in box
-        cout << setw(13) << "";
-        printf("|%-9s | %-5s | %-5s | %-10s | %-10s | %-10s | %-10s |\n", "Rental ID", "Car ID", "Customer ID", "Rental Date", "Return Date", "Total Price", "Rental Status");
-        cout << setw(107) << "---------------------------------------------------------------------------------------------\n";
+        cout << setw(114) << "------------------------------------------------------------------------------------------------------------\n";
+        // Data show in box
+        cout << setw(5) << "";
+        printf("|%-9s | %-9s | %-11s | %-10s | %-10s | %-11s | %-11s | %-14s |\n", "Rental ID", "Car ID", "Customer ID", "Car Brand", "Plate", "Rental Date", "Return Date", "Rental Status");
+        cout << setw(114) << "------------------------------------------------------------------------------------------------------------\n";
 
-        while ((row = mysql_fetch_row(res)))
-        {
-            cout << setw(13) << "";
-            printf("|%-9s | %-5s | %-5s | %-10s | %-10s | %-10s | %-10s |\n", row[0], row[1], row[2], row[3], row[4], row[5], row[6]);
-            cout << setw(107) << "--------------------------------------------------------------------------------------\n";
+        while ((row = mysql_fetch_row(res))) {
+            cout << setw(5) << "";
+            printf("|%-9s | %-9s | %-11s | %-10s | %-10s | %-11s | %-11s | %-14s |\n", row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]);
+            cout << setw(114) << "------------------------------------------------------------------------------------------------------------\n";
         }
+
         cout << "\n\n" << setw(68) << "Choose Rental ID: ";
-        cin.ignore(1, '\n'); //Discard any leftover newline from previous input
+        cin.ignore(1, '\n'); // Discard any leftover newline from previous input
         getline(cin, ID);
 
-        //update rental status to 'returned'
+        // Check if the Rental ID exists
+        std::string check_query = "SELECT COUNT(*) FROM rent WHERE RentID = '" + ID + "'";
+        if (mysql_query(conn, check_query.c_str())) {
+            std::cerr << "Error checking rental ID: " << mysql_error(conn) << std::endl;
+            return;
+        }
+
+        res = mysql_store_result(conn);
+        row = mysql_fetch_row(res);
+
+        if (row && atoi(row[0]) == 0) {
+            cout << "\n";
+            cout << setw(82) << "Rental ID not found. Please try again.";
+            cout << "\n\n";
+            cout << setw(84) << "Do you want to return to the menu? (y/n): ";
+            char choice;
+            cin >> choice;
+            if (choice == 'y' || choice == 'Y') {
+                RentalMenu();
+            }
+            else {
+                ReturnCar();
+            }
+            return;
+        }
+
+        // Update rental status to 'returned'
         std::string update_query = "UPDATE rent SET Rent_Status = 'returned' WHERE RentID = '" + ID + "' ";
         if (mysql_query(conn, update_query.c_str())) {
             std::cerr << "Error updating rental status: " << mysql_error(conn) << std::endl;
-
+            return;
         }
+
         // Log the return date and time
-        std::string log_query = "INSERT into car_return (RentID, ReturnDate) VALUES ('" + ID + "', NOW())";
+        std::string log_query = "INSERT INTO car_return (RentID, ReturnDate) VALUES ('" + ID + "', NOW())";
         if (mysql_query(conn, log_query.c_str())) {
             std::cerr << "Error logging return date: " << mysql_error(conn) << std::endl;
-            mysql_close(conn);
-
+            return;
         }
+
         std::cout << "\n";
-        cout << setw(83) << "Rental car return successfully! Update the car status? (y/n): ";
+        cout << setw(83) << "Rental car returned successfully! Update the car status? (y/n): ";
         char option;
         cin >> option;
 
-        if (option == 'y' || option == 'Y')
-        {
+        if (option == 'y' || option == 'Y') {
             UpdateCar();
         }
-        else
-        {
+        else {
             RentalMenu();
         }
+    }
+    else {
+        std::cerr << "Error fetching rental data: " << mysql_error(conn) << std::endl;
     }
 }
 
@@ -2895,7 +2936,7 @@ void RentList() {
     std::string filePath = "rent.txt"; // Path to the admin file
     welcomeHeader(filePath);
 
-    qstate = mysql_query(conn, "select * from rent");
+    qstate = mysql_query(conn, "SELECT rent.RentID, car.CarID, rent.CustID, carcat.CarBrand, car.Plate, rent.Rent_Date, rent.Return_Date, rent.Rent_Status FROM carcat JOIN car ON carcat.CatID = car.CatID JOIN rent ON car.CarID = rent.CarID");
 
     if (!qstate)
     {
@@ -2903,17 +2944,16 @@ void RentList() {
         res = mysql_store_result(conn);
 
         cout << "\n\n";
-        cout << setw(107) << "---------------------------------------------------------------------------------------------\n";
-        //data show in box
-        cout << setw(13) << "";
-        printf("|%-9s | %-5s | %-5s | %-10s | %-10s | %-10s | %-10s |\n", "Rental ID", "Car ID", "Customer ID", "Rental Date", "Return Date", "Total Price", "Rental Status");
-        cout << setw(107) << "---------------------------------------------------------------------------------------------\n";
+        cout << setw(114) << "------------------------------------------------------------------------------------------------------------\n";
+        // Data show in box
+        cout << setw(5) << "";
+        printf("|%-9s | %-9s | %-11s | %-10s | %-10s | %-11s | %-11s | %-14s |\n", "Rental ID", "Car ID", "Customer ID", "Car Brand", "Plate", "Rental Date", "Return Date", "Rental Status");
+        cout << setw(114) << "------------------------------------------------------------------------------------------------------------\n";
 
-        while ((row = mysql_fetch_row(res)))
-        {
-            cout << setw(13) << "";
-            printf("|%-9s | %-5s | %-5s | %-10s | %-10s | %-10s | %-10s |\n", row[0], row[1], row[2], row[3], row[4], row[5], row[6]);
-            cout << setw(107) << "--------------------------------------------------------------------------------------\n";
+        while ((row = mysql_fetch_row(res))) {
+            cout << setw(5) << "";
+            printf("|%-9s | %-9s | %-11s | %-10s | %-10s | %-11s | %-11s | %-14s |\n", row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]);
+            cout << setw(114) << "------------------------------------------------------------------------------------------------------------\n";
         }
     }
     else
@@ -2939,7 +2979,11 @@ void SearchRent() {
     cout << setw(75) << "SEARCH rent by RentID: ";
     getline(cin, rental_id);
 
-    string searchRent_query = "SELECT * FROM rent WHERE RentID like '" + rental_id + "'";
+    string searchRent_query = "SELECT rent.RentID, car.CarID, rent.CustID, carcat.CarBrand, car.Plate, rent.Rent_Date, rent.Return_Date, rent.Rent_Status "
+        "FROM carcat "
+        "JOIN car ON carcat.CatID = car.CatID "
+        "JOIN rent ON car.CarID = rent.CarID "
+        "WHERE rent.RentID LIKE '" + rental_id + "'";
     const char* sr = searchRent_query.c_str();
     qstate = mysql_query(conn, sr);
 
@@ -2949,17 +2993,16 @@ void SearchRent() {
         res = mysql_store_result(conn);
 
         cout << "\n\n";
-        cout << setw(107) << "---------------------------------------------------------------------------------------------\n";
-        //data show in box
-        cout << setw(13) << "";
-        printf("|%-9s | %-5s | %-5s | %-10s | %-10s | %-10s | %-10s |\n", "Rental ID", "Car ID", "Customer ID", "Rental Date", "Return Date", "Total Price", "Rental Status");
-        cout << setw(107) << "---------------------------------------------------------------------------------------------\n";
+        cout << setw(114) << "------------------------------------------------------------------------------------------------------------\n";
+        // Data show in box
+        cout << setw(5) << "";
+        printf("|%-9s | %-9s | %-11s | %-10s | %-10s | %-11s | %-11s | %-14s |\n", "Rental ID", "Car ID", "Customer ID", "Car Brand", "Plate", "Rental Date", "Return Date", "Rental Status");
+        cout << setw(114) << "------------------------------------------------------------------------------------------------------------\n";
 
-        while ((row = mysql_fetch_row(res)))
-        {
-            cout << setw(13) << "";
-            printf("|%-9s | %-5s | %-5s | %-10s | %-10s | %-10s | %-10s |\n", row[0], row[1], row[2], row[3], row[4], row[5], row[6]);
-            cout << setw(107) << "--------------------------------------------------------------------------------------\n";
+        while ((row = mysql_fetch_row(res))) {
+            cout << setw(5) << "";
+            printf("|%-9s | %-9s | %-11s | %-10s | %-10s | %-11s | %-11s | %-14s |\n", row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]);
+            cout << setw(114) << "------------------------------------------------------------------------------------------------------------\n";
         }
     }
 
@@ -2990,7 +3033,7 @@ void StaffLogin() {
 
     string staffpassword;
     string staffusername;
-    cout << setw(63) << "Username: ";
+    cout << setw(61) << "Username: ";
     cin >> staffusername;
 
     // Validate username input
@@ -3001,7 +3044,7 @@ void StaffLogin() {
         return;
     }
 
-    cout << "\n\n" << setw(63) << "Password: ";
+    cout << "\n\n" << setw(61) << "Password: ";
     char ch;
     while ((ch = _getch()) != '\r') {
         if (ch == 8) {
@@ -3067,14 +3110,14 @@ void StaffPage() {
     std::string filePath = "staff.txt"; // Path to the admin file
     welcomeHeader(filePath);
 
-    cout << setw(63) << " Login as: " << StaffName << "\n\n\n";
-    cout << setw(73) << "1. Manage Customer\n\n" << endl;
-    cout << setw(69) << "2. Monitor Car\n\n" << endl;
-    cout << setw(76) << "3. Update Rent Status\n\n" << endl;
-    cout << setw(70) << "4. Display Rent\n\n" << endl;
-    cout << setw(64) << "5. Logout\n\n" << endl;
-    cout << setw(87) << "-----------------------------------------\n" << endl;
-    cout << setw(78) << "Please Enter Your Choice : ";
+    cout << setw(59) << " Login as: " << StaffName << "\n\n\n";
+    cout << setw(69) << "1. Manage Customer\n\n" << endl;
+    cout << setw(65) << "2. Monitor Car\n\n" << endl;
+    cout << setw(72) << "3. Update Rent Status\n\n" << endl;
+    cout << setw(66) << "4. Display Rent\n\n" << endl;
+    cout << setw(60) << "5. Logout\n\n" << endl;
+    cout << setw(80) << "-----------------------------------------\n" << endl;
+    cout << setw(72) << "Please Enter Your Choice : ";
     cin >> menu;
 
     switch (menu)
@@ -3132,14 +3175,14 @@ void CustMenu() {
     std::string filePath = "staff.txt"; // Path to the admin file
     welcomeHeader(filePath);
 
-    cout << setw(75) << "1. Register Customer\n\n";
-    cout << setw(73) << "2. Update Customer\n\n";
-    cout << setw(73) << "3. Delete Customer\n\n";
-    cout << setw(74) << "4. Display Customer\n\n";
-    cout << setw(73) << "5. Search Customer\n\n";
-    cout << setw(63) << "6. Back\n\n\n";
-    cout << setw(85) << "-------------------------------------------\n" << endl;
-    cout << setw(78) << "Please Enter Your Choice : ";
+    cout << setw(71) << "1. Register Customer\n\n";
+    cout << setw(69) << "2. Update Customer\n\n";
+    cout << setw(69) << "3. Delete Customer\n\n";
+    cout << setw(70) << "4. Display Customer\n\n";
+    cout << setw(69) << "5. Search Customer\n\n";
+    cout << setw(59) << "6. Back\n\n\n";
+    cout << setw(82) << "-------------------------------------------\n" << endl;
+    cout << setw(73) << "Please Enter Your Choice : ";
     cin >> choose;
 
     if (choose == 1)
@@ -3278,19 +3321,19 @@ void CustUpdate() {
                         system("cls");
                         welcomeHeader(filePath);
                         cout << "\n";
-                        cout << setw(82) << "---------------------------------------" << endl;
+                        cout << setw(79) << "---------------------------------------" << endl;
                         cout << "\n";
-                        cout << setw(56) << "IC: " << row[2] << endl;
+                        cout << setw(44) << "IC: " << row[2] << endl;
                         cout << "\n";
-                        cout << setw(58) << "Name: " << row[1] << endl;
+                        cout << setw(46) << "Name: " << row[1] << endl;
                         cout << "\n";
-                        cout << setw(61) << "License: " << row[4] << endl;
+                        cout << setw(49) << "License: " << row[4] << endl;
                         cout << "\n";
-                        cout << setw(59) << "Customer Email: " << row[6] << endl;
+                        cout << setw(56) << "Customer Email: " << row[6] << endl;
                         cout << "\n";
-                        cout << setw(63) << "Customer No. Phone: " << row[5] << endl;
+                        cout << setw(60) << "Customer No. Phone: " << row[5] << endl;
                         cout << "\n";
-                        cout << setw(82) << "---------------------------------------" << endl << endl;
+                        cout << setw(79) << "---------------------------------------" << endl << endl;
 
                     }
                     break; // Exit retry loop
@@ -3314,17 +3357,17 @@ void CustUpdate() {
         }
 
         // Update options
-        cout << setw(71) << "1. Customer Email\n\n";
-        cout << setw(75) << "2. Customer No. Phone\n\n";
-        cout << setw(61) << "3. Back\n\n";
-        cout << setw(83) << "---------------------------------------\n" << endl;
-        cout << setw(75) << "Please Enter Your Choice : ";
+        cout << setw(59) << "1. Customer Email\n\n";
+        cout << setw(63) << "2. Customer No. Phone\n\n";
+        cout << setw(49) << "3. Back\n\n";
+        cout << setw(80) << "---------------------------------------\n" << endl;
+        cout << setw(72) << "Please Enter Your Choice : ";
         cin >> choose;
         cin.ignore(1, '\n'); // Clear newline from input buffer
 
         if (choose == 1)
         {
-            cout << endl << endl << setw(75) << "1. New Customer Email: ";
+            cout << endl << endl << setw(63) << "1. New Customer Email: ";
             getline(cin, DataCust);
             string update_query = "UPDATE customer SET Email='" + DataCust + "' WHERE CustID='" + ID + "'";
             const char* q = update_query.c_str();
@@ -3332,7 +3375,7 @@ void CustUpdate() {
         }
         else if (choose == 2)
         {
-            cout << endl << endl << setw(75) << "2. New Customer Phone: ";
+            cout << endl << endl << setw(63) << "2. New Customer Phone: ";
             getline(cin, DataCust);
             string update_query = "UPDATE customer SET Phone='" + DataCust + "' WHERE CustID='" + ID + "'";
             const char* q = update_query.c_str();
@@ -3343,7 +3386,7 @@ void CustUpdate() {
             CustMenu();
         }
 
-        cout << endl << setw(86) << "Do you want to update other Customer? (y/n): ";
+        cout << endl << setw(81) << "Do you want to update other Customer? (y/n): ";
         cin >> option;
 
         if (option == 'y' || option == 'Y')
@@ -3374,21 +3417,19 @@ void CustDelete() {
         res = mysql_store_result(conn);
 
         cout << "\n";
-        cout << setw(114) << "----------------------------------------------------------------------------------------------------\n";
+        cout << setw(105) << "-------------------------------------------------------------------------------------------\n";
         //data show in box
         cout << setw(13) << "";
-        printf("|%-15s | %-25s | %-15s | %-20s | %-10s | %-20s |\n", "ID", "Name", "IC", "License", "No.Phone", "Email");
-        cout << setw(114) << "----------------------------------------------------------------------------------------------------\n";
+        printf("|%-3s | %-12s | %-15s | %-10s | %-13s | %-20s |\n", "ID", "Name", "IC", "License", "No.Phone", "Email");
+        cout << setw(105) << "-------------------------------------------------------------------------------------------\n";
 
         while ((row = mysql_fetch_row(res)))
         {
-
-
             cout << setw(13) << "";
-            printf("|%-15s | %-25s | %-15s | %-20s | %-10s |%-20s |\n", row[0], row[1], row[2], row[3], row[4], row[5]);
-            cout << setw(114) << "----------------------------------------------------------------------------------------------------\n";
+            printf("|%-3s | %-12s | %-15s | %-10s | %-13s | %-20s |\n", row[0], row[1], row[2], row[4], row[5], row[6]);
+            cout << setw(105) << "-------------------------------------------------------------------------------------------\n";
         }
-        cout << endl << endl << setw(43) << "  Choose Customer IC : ";
+        cout << endl << endl << setw(66) << "  Choose Customer IC : ";
         cin >> IC;
 
         bool found = false;
@@ -3427,7 +3468,7 @@ void CustDelete() {
 
         else
         {
-            cout << endl << setw(35) << "             Please Enter a valid ID.Do You Want To Try Again? (y|n): ";
+            cout << endl << setw(84) << "Please Enter a valid ID. Do You Want To Try Again? (y/n): ";
             cin >> choose;
             if (choose == 'y' || choose == 'Y')
             {
@@ -3463,7 +3504,7 @@ void CustSearch() {
 
     cin.ignore(1, '\n');
     cout << setw(24) << "";
-    cout << setw(24) << "Search Customer by name: ";
+    cout << setw(46) << "Search Customer by name: ";
     getline(cin, name);
 
     string search_query = "select * from customer where Name like '%" + name + "%'";
@@ -3476,23 +3517,20 @@ void CustSearch() {
 
 
         cout << "\n";
-        cout << setw(114) << "----------------------------------------------------------------------------------------------------\n";
+        cout << setw(105) << "-------------------------------------------------------------------------------------------\n";
         //data show in box
         cout << setw(13) << "";
-        printf("|%-15s | %-25s | %-15s | %-20s | %-10s | %-20s |\n", "ID", "Name", "IC", "License", "No.Phone", "Email");
-        cout << setw(114) << "----------------------------------------------------------------------------------------------------\n";
+        printf("|%-3s | %-12s | %-15s | %-10s | %-13s | %-20s |\n", "ID", "Name", "IC", "License", "No.Phone", "Email");
+        cout << setw(105) << "-------------------------------------------------------------------------------------------\n";
 
         while ((row = mysql_fetch_row(res)))
         {
-
             cout << setw(13) << "";
-            printf("|%-15s | %-25s | %-15s | %-20s | %-10s |%-20s |\n", row[0], row[1], row[2], row[3], row[4], row[5]);
-            cout << setw(114) << "----------------------------------------------------------------------------------------------------\n";
+            printf("|%-3s | %-12s | %-15s | %-10s | %-13s | %-20s |\n", row[0], row[1], row[2], row[4], row[5], row[6]);
+            cout << setw(105) << "-------------------------------------------------------------------------------------------\n";
         }
-
-
-        cout << endl << setw(50) << "";
-        cout << setw(10) << "Do you want to search other Customer? (y|n): ";
+        cout << "\n";
+        cout << setw(81) << "Do you want to search other Customer? (y/n): ";
         cin >> choose;
 
         if (choose == 'y' || choose == 'Y')
@@ -3538,7 +3576,7 @@ void CustList() {
         cout << "Query Execution Problem!" << mysql_error(conn) << endl;
     }
     std::cout << "\n";
-    cout << setw(73) << "Press Enter To Back....";
+    cout << setw(71) << "Press Enter To Back....";
     _getch();
     CustMenu();
 }
@@ -3550,13 +3588,13 @@ void MenuCar() {
     std::string filePath = "staff.txt"; // Path to the admin file
     welcomeHeader(filePath);
 
-    cout << setw(61) << "1. Update Car\n\n";
-    cout << setw(61) << "2. Delete Car\n\n";
-    cout << setw(62) << "3. Display Car\n\n";
-    cout << setw(61) << "4. Search Car\n\n";
-    cout << setw(56) << "5. Back\n\n\n";
+    cout << setw(65) << "1. Update Car\n\n";
+    cout << setw(65) << "2. Delete Car\n\n";
+    cout << setw(66) << "3. Display Car\n\n";
+    cout << setw(65) << "4. Search Car\n\n";
+    cout << setw(60) << "5. Back\n\n\n";
     cout << setw(79) << "-------------------------------------------\n" << endl;
-    cout << setw(70) << "Please Enter Your Choice : ";
+    cout << setw(71) << "Please Enter Your Choice : ";
     cin >> choose;
 
     if (choose == 1)
@@ -3593,88 +3631,97 @@ void CarUpdate() {
 
     qstate = mysql_query(conn, "SELECT * FROM car");
 
-    if (!qstate)
-    {
+    if (!qstate) {
 
         res = mysql_store_result(conn);
 
         cout << "\n";
-        cout << setw(18) << ""; cout << "------------------------------------------------------------------------------------------\n";
+        cout << setw(30) << ""; cout << "-------------------------------------------------------\n";
         //data show in box
-        cout << setw(18) << "";
-        printf("| %-3s | %-13s | %-15s | %-11s | %-15s | %-15s | \n", "ID", "Car Brand", "Car Name", "Plate", "Price", "Status");
-        cout << setw(18) << ""; cout << "------------------------------------------------------------------------------------------\n";
+        cout << setw(30) << "";
+        printf("| %-3s | %-13s | %-15s | %-11s | \n", "ID", "Plate", "Price", "Status");
+        cout << setw(30) << ""; cout << "-------------------------------------------------------\n";
 
         while ((row = mysql_fetch_row(res)))
         {
-
-
-            cout << setw(18) << "";
-            printf("| %-3s | %-13s | %-15s | %-11s | %-15s | %-15s |\n", row[0], row[1], row[2], row[3], row[4], row[5]);
-            cout << setw(18) << ""; cout << "------------------------------------------------------------------------------------------\n";
+            cout << setw(30) << "";
+            printf("| %-3s | %-13s | %-15s | %-11s | \n", row[0], row[1], row[2], row[3]);
+            cout << setw(30) << ""; cout << "-------------------------------------------------------\n";
         }
-        cout << endl << endl << setw(73) << "  Choose ID : ";
+        cout << endl << endl << setw(65) << "Choose ID : ";
         cin >> CarID;
-
-        system("cls");
-        std::string filePath = "admin.txt"; // Path to the admin file
-        welcomeHeader(filePath);
 
         string findbyid_query = "SELECT * FROM car where carID='" + CarID + "'";
         const char* qi = findbyid_query.c_str();
         qstate = mysql_query(conn, qi);
 
-        if (!qstate)
-        {
+        if (!qstate) {
             res = mysql_store_result(conn);
-            cout << endl;
-            while ((row = mysql_fetch_row(res)))
-            {
-                system("cls");
-                std::string filePath = "admin.txt"; // Path to the admin file
-                welcomeHeader(filePath);
-
+            if ((row = mysql_fetch_row(res)) == nullptr) {
                 cout << "\n";
-                cout << setw(82) << "---------------------------------------" << endl;
-                cout << setw(60) << "Car Brand: " << row[1] << endl;
-                cout << setw(59) << "Car Name: " << row[2] << endl;
-                cout << setw(56) << "Plate: " << row[3] << endl;
-                cout << setw(65) << "Price: " << row[4] << endl;
-                cout << setw(57) << "Status: " << row[5] << endl;
-                cout << setw(82) << "---------------------------------------" << endl << endl;
+                cout << setw(78) << "Car ID not found. Want to try again? (y/n): ";
+                cin >> option;
+                if (option == 'y' || option == 'Y') {
+                    CarUpdate();
+                }
+                else {
+                    MenuCar();
+                    return;
+                }
+                return;
             }
+
+            cout << endl;
+
+            cout << "\n";
+            cout << setw(77) << "----------------------------------" << endl << endl;
+            cout << setw(60) << "Plate: " << row[1] << endl;
+            cout << "\n";
+            cout << setw(60) << "Price: " << row[2] << endl;
+            cout << "\n";
+            cout << setw(61) << "Status: " << row[3] << endl;
+            cout << "\n";
+            cout << setw(77) << "----------------------------------" << endl << endl;
         }
-        else
-        {
+        else {
             cout << "Query Execution Problem!" << mysql_error(conn) << endl;
             system("pause");
         }
 
-        cout << setw(71) << "1. Price\n\n";
-        cout << setw(63) << "2. Status\n\n";
-        cout << setw(61) << "3. Back\n\n";
-        cout << setw(86) << "-------------------------------------------\n" << endl;
+        cout << setw(63) << "1. Plate\n\n";
+        cout << setw(63) << "2. Price\n\n";
+        cout << setw(64) << "3. Status\n\n";
+        cout << setw(62) << "4. Back\n\n";
+        cout << setw(78) << "-----------------------------------\n" << endl;
         cout << setw(70) << "Please Enter Your Choice : ";
         cin >> choose;
 
         cin.ignore(1, '\n');
         if (choose == 1)
         {
-            cout << endl << endl << setw(71) << "1. Price: ";
+            cout << endl << endl << setw(58) << "1. Plate: ";
             getline(cin, c_data);
-            string update_query = "update car set Price='" + c_data + "' where CarID='" + CarID + "'";
+            string update_query = "update car set Plate='" + c_data + "' where CarID='" + CarID + "'";
             const char* q = update_query.c_str();
             qstate = mysql_query(conn, q);
         }
         else if (choose == 2)
         {
+            cout << endl << endl << setw(58) << "2. Price: ";
+            getline(cin, c_data);
+            string update_query = "update car set Price='" + c_data + "' where CarID='" + CarID + "'";
+            const char* q = update_query.c_str();
+            qstate = mysql_query(conn, q);
+        }
+        else  if (choose == 3)
+        {
             int choice = 0;
 
             while (choice != 1 && choice != 2) {
-                cout << endl << endl << setw(75) << "Update Car Status" << endl;
-                cout << endl << endl << setw(75) << "1. Available" << endl;
-                cout << endl << endl << setw(75) << "2. Rented" << endl;
-                cout << endl << endl << setw(75) << "Enter your choice (1 or 2): ";
+                cout << endl << endl << setw(65) << "Update Car Status" << endl;
+                cout << endl << endl << setw(60) << "1. Available" << endl;
+                cout << endl << endl << setw(57) << "2. Rented" << endl;
+                cout << endl << endl << setw(71) << "Enter your choice (1 or 2): ";
                 cin >> choice;
 
 
@@ -3688,15 +3735,12 @@ void CarUpdate() {
             const char* ca = updateCar_query.c_str();
             qstate = mysql_query(conn, ca);
         }
-
-        else  if (choose == 3)
-
-
+        else  if (choose == 4)
         {
-            MenuCar();
+            CarMenu();
         }
 
-        cout << endl << setw(85) << "Do you want to update other Car? (y|n): ";
+        cout << endl << setw(80) << "Do you want to update other Car? (y/n): ";
         cin >> option;
 
         if (option == 'y' || option == 'Y')
@@ -3725,21 +3769,20 @@ void CarDelete() {
         res = mysql_store_result(conn);
 
         cout << "\n";
-        cout << setw(18) << ""; cout << "------------------------------------------------------------------------------------------\n";
+        cout << setw(30) << ""; cout << "-------------------------------------------------------\n";
         //data show in box
-        cout << setw(25) << "";
-        printf("| %-3s | %-13s | %-15s | %-11s | %-15s | %-15s | \n", "ID", "Car Brand", "Car Name", "Plate", "Price", "Status");
-        cout << setw(18) << ""; cout << "------------------------------------------------------------------------------------------\n";
+        cout << setw(30) << "";
+        printf("| %-3s | %-13s | %-15s | %-11s | \n", "ID", "Plate", "Price", "Status");
+        cout << setw(30) << ""; cout << "-------------------------------------------------------\n";
 
         while ((row = mysql_fetch_row(res)))
         {
-
-            cout << setw(25) << "";
-            printf("| %-3s | %-13s | %-15s | %-11s | %-15s | %-15s |\n", row[0], row[1], row[2], row[3], row[4], row[5]);
-            cout << setw(18) << ""; cout << "------------------------------------------------------------------------------------------\n";
+            cout << setw(30) << "";
+            printf("| %-3s | %-13s | %-15s | %-11s | \n", row[0], row[1], row[2], row[3]);
+            cout << setw(30) << ""; cout << "-------------------------------------------------------\n";
         }
 
-        cout << endl << endl << setw(70) << "Enter ID to delete: ";
+        cout << endl << endl << setw(68) << "Enter ID to delete: ";
         cin >> id;
 
         bool found = false;
@@ -3778,27 +3821,27 @@ void CarDelete() {
 
         else
         {
-            cout << endl << setw(78) << "Please Enter a valid ID.Do You Want To Try Again? (y|n): ";
+            cout << endl << setw(83) << "Please Enter a valid ID. Do You Want To Try Again? (y/n): ";
             cin >> choose;
             if (choose == 'y' || choose == 'Y')
             {
-                DeleteCar();
+                CarDelete();
             }
             else if (choose == 'n' || choose == 'N')
             {
                 MenuCar();
             }
         }
-        cout << endl << setw(78) << "Do you want to Delete another Car?(y|n): ";
+        cout << endl << setw(78) << "Do you want to Delete another Car? (y/n): ";
         cin >> choose;
 
         if (choose == 'y' || choose == 'Y')
         {
-            DeleteCar();
+            CarDelete();
         }
         else
         {
-            ListCar();
+            CarList();
         }
     }
 }
@@ -3814,18 +3857,17 @@ void CarList() {
         res = mysql_store_result(conn);
 
         cout << "\n";
-        cout << setw(109) << "---------------------------------------------------------------------------------------------\n";
+        cout << setw(30) << ""; cout << "-------------------------------------------------------\n";
         //data show in box
-        cout << setw(15) << "";
-        printf("| %-3s | %-13s | %-15s | %-11s | %-15s | %-15s | \n", "ID", "Car Brand", "Car Name", "Plate", "Price", "Status");
-        cout << setw(109) << "---------------------------------------------------------------------------------------------\n";
+        cout << setw(30) << "";
+        printf("| %-3s | %-13s | %-15s | %-11s | \n", "ID", "Plate", "Price", "Status");
+        cout << setw(30) << ""; cout << "-------------------------------------------------------\n";
 
         while ((row = mysql_fetch_row(res)))
         {
-
-            cout << setw(15) << "";
-            printf("| %-3s | %-13s | %-15s | %-11s | %-15s | %-15s |\n", row[0], row[1], row[2], row[3], row[4], row[5]);
-            cout << setw(109) << "---------------------------------------------------------------------------------------------\n";
+            cout << setw(30) << "";
+            printf("| %-3s | %-13s | %-15s | %-11s | \n", row[0], row[1], row[2], row[3]);
+            cout << setw(30) << ""; cout << "-------------------------------------------------------\n";
         }
 
     }
@@ -4201,6 +4243,8 @@ void CustPage() {
 
 void RentalInCustomer() {
 
+    std::string answer;
+
     db_response::ConnectionFunction();
     system("cls");
     std::string filePath = "rent.txt"; // Path to the admin file
@@ -4210,7 +4254,7 @@ void RentalInCustomer() {
     std::string IC, carID, rentalDateStr, returnDateStr, pickUpTimeStr = "10:00", dropOffTimeStr = "10:00";
 
     // Prompt customer to enter their IC
-    std::cout << "\n\n" << std::setw(65) << "Enter Your Customer ID : ";
+    std::cout << "\n\n" << std::setw(65) << "Enter Your IC : ";
     std::cin >> IC;
 
     // Validate customer ID exists
@@ -4244,7 +4288,58 @@ void RentalInCustomer() {
     row = mysql_fetch_row(res);
     if (row) {
         std::cerr << "\nYou already have an active rental. Please return the car before renting another.\n";
+        std::cout << "\nPlease go to counter contact our admin or staff for further assistance.\n";
         mysql_free_result(res);
+
+        std::cout << "\nOptions:\n";
+        std::cout << "1. Log Out\n";
+        std::cout << "2. Return to Main Menu\n";
+        std::cout << "Enter your choice: ";
+
+        int choice;
+        std::cin >> choice;
+        switch (choice) {
+        case 1:
+            system("cls");
+            std::cout << "\n                                   Do you want to logout the system? (yes/no): ";
+            std::cin >> answer;
+
+            for (char& c : answer) {
+                c = std::tolower(c);
+            }
+
+            system("cls");
+
+            if (answer == "yes" || answer == "y") {
+                ifstream inputFile("thank.txt"); //displaying thank you ASCII image text on output screen fn1353
+                if (!inputFile) {
+                    cout << "Cannot open input file.\n";
+                }
+                char str[1000];
+                while (inputFile) {
+                    inputFile.getline(str, 1000);
+                    if (inputFile)
+                        cout << str << endl;
+                }
+                inputFile.close();
+                std::cout << "\n Logged out successfully\n" << std::endl;
+                std::cin.get();
+                exit(0); // Terminate the program with exit code 0 (indicating a successful exit)
+            }
+            else {
+                RentalInCustomer();
+            }
+            break;
+        case 2:
+            std::cout << "\nReturning to the main menu.\n";
+            CustPage(); // Call the customer main menu function
+            break;
+        default:
+            std::cerr << "\nInvalid choice. Returning to the main menu.\n";
+            CustPage(); // Handle invalid input gracefully
+
+            break;
+        }
         return;
     }
     mysql_free_result(res);
@@ -4393,4 +4488,111 @@ void DisplayRental() {
     cout << "\n" << setw(75) << "Press Enter To Back....";
     _getch();
     CustPage();
+}
+
+//inadmin
+void Report() {
+    db_response::ConnectionFunction();
+    system("cls");
+    std::string filePath = "admin.txt"; // Path to the admin file
+    welcomeHeader(filePath);
+
+    int choose;
+    cout << "\n\n";
+    cout << setw(72) << "1. Sales Revenue \n\n";
+    cout << setw(74) << "2. Most rented car \n\n";
+    cout << setw(63) << "3. Back \n\n";
+    cout << setw(87) << "----------------------------------------------\n" << endl;
+    cout << setw(77) << "Please Enter Your Choice : ";
+    cin >> choose;
+    if (choose == 1) {
+system("cls");
+    std::string filePath = "admin.txt";
+    welcomeHeader(filePath);
+
+    std::string startDate, endDate;
+    std::cout << "\n\n" << std::setw(71) << "Enter start date (YYYY-MM-DD): ";
+    std::cin >> startDate;
+
+    std::cout << "\n" << std::setw(71) << "Enter end date (YYYY-MM-DD): ";
+    std::cin >> endDate;
+    std::cout << "\n\n";
+
+    if (!calculateSalesRevenueByDateRange(conn, startDate, endDate)) {
+        std::cerr << "Error calculating sales revenue\n";
+        mysql_close(conn);
+        return;
+    }
+
+    char choose;
+    std::cout << "\n\n" << std::setw(70) << "Continue? (y/n): ";
+    std::cin >> choose;
+
+    if (choose == 'y' || choose == 'Y') {
+        Report();
+    } else {
+        AdminMenu();
+    }
+
+    }
+    else if (choose == 2) {
+        system("cls");
+        std::string filePath = "admin.txt"; // Path to the admin file
+        welcomeHeader(filePath);
+        std::string startDate, endDate;
+        std::cout << "\n\n" << std::setw(71) << "Enter start date (YYYY-MM-DD): ";
+        std::cin >> startDate;
+        std::cout << "\n" << std::setw(71) << "Enter end date (YYYY-MM-DD): ";
+        std::cin >> endDate;
+        std::cout << "\n\n";
+
+        if (findRentedCarsInDateRange(conn, startDate, endDate)) {
+            mysql_close(conn);
+            char choose;
+            std::cout << "\n";
+            cout << endl << setw(70) << "Continue ? (y/n): ";
+            cin >> choose;
+
+            if (choose == 'y' || choose == 'Y')
+            {
+                Report();
+            }
+            else {
+                AdminMenu();
+            }
+            return;
+        }
+        
+        char choose;
+        std::cout << "\n";
+        cout << endl << setw(70) << "Continue ? (y/n): ";
+        cin >> choose;
+
+        if (choose == 'y' || choose == 'Y')
+        {
+            Report();
+        }
+        else
+        {
+
+            AdminMenu();
+        }
+
+
+    }
+    else if (choose == 3) {
+        char choose;
+        std::cout << "\n                                         Do you want to go back to Main Menu? (yes/no): ";
+        cin >> choose;
+
+        if (choose == 'y' || choose == 'Y')
+        {
+            AdminMenu();
+        }
+        else
+        {
+
+            Report();
+        }
+    }  
 }
