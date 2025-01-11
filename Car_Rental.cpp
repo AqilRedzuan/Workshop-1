@@ -25,6 +25,8 @@ MYSQL_ROW row;
 MYSQL_RES* res;
 string items[20000000];
 string adminId, Employee_ID, CustID, CarID, CatID, RentalID, IC, StaffID, StaffName,CustName;
+string user, pw;
+
 
 void adminlogin();
 void AdminMenu();
@@ -1655,36 +1657,64 @@ void UpdateCar() {
             const char* q = update_query.c_str();
             qstate = mysql_query(conn, q);
         }
-        else if (choose == 3) {
+        else if (choose == 3)
+        {
             int choice = 0;
-            system("cls");
-            std::string filePath = "admin.txt"; // Path to the admin file
-            welcomeHeader(filePath);
+            bool tryAgain = true;
 
-            while (choice != 1 && choice != 2) {
-                cout << "\n\n";
-                cout << setw(82) << "---------------------------------------" << endl;
-                cout << endl << endl << setw(72) << "Update Car Status" << endl;
+            while (tryAgain) {
+                // Display the menu
+                cout << endl << endl << setw(68) << "Update Car Status" << endl;
                 cout << endl << endl << setw(67) << "1. Available" << endl;
                 cout << endl << endl << setw(64) << "2. Rented" << endl;
-                cout << "\n\n";
-                cout << setw(82) << "---------------------------------------" ;
-                cout << endl << endl << setw(78) << "Enter your choice (1 or 2): ";
+                cout << endl << endl << setw(64) << "3. Repair" << endl;
+                cout << endl << endl << setw(75) << "Enter your choice (1, 2, or 3): ";
                 cin >> choice;
 
+                // Check if input is valid
+                if (choice == 1 || choice == 2 || choice == 3) {
+                    tryAgain = false; // Valid choice, exit the loop
+                }
+                else {
+                    cout << endl << endl << setw(80) << "Invalid choice. Please enter 1, 2, or 3." << endl;
 
-                if (choice != 1 && choice != 2) {
-                    cout << "Invalid choice. Please enter 1 or 2." << endl;
-                    system("cls");
-                    std::string filePath = "admin.txt"; // Path to the admin file
-                    welcomeHeader(filePath);
+                    // Ask if the user wants to try again
+                    char retryChoice;
+                    cout << endl << endl << setw(76) << "Do you want to try again? (y/n): ";
+                    cin >> retryChoice;
+
+                    // Exit if the user does not want to try again
+                    if (retryChoice == 'n' || retryChoice == 'N') {
+                        CarMenu();
+                        return; // Exit the function
+                    }
                 }
             }
 
-            string newStatus = (choice == 1) ? "Available" : "Rented";
+            // Determine the new status based on user input
+            string newStatus;
+            if (choice == 1) {
+                newStatus = "Available";
+            }
+            else if (choice == 2) {
+                newStatus = "Rented";
+            }
+            else if (choice == 3) {
+                newStatus = "Repair";
+            }
+
+            // Prepare and execute the SQL query to update the car status
             string updateCar_query = "UPDATE car SET Status = '" + newStatus + "' WHERE CarID='" + CarID + "'";
             const char* ca = updateCar_query.c_str();
             qstate = mysql_query(conn, ca);
+
+            // Check for SQL query success
+            if (qstate == 0) {
+                cout << "Car status updated successfully to " << newStatus << "." << endl;
+            }
+            else {
+                cout << "Failed to update car status. Please try again later." << endl;
+            }
         }
         else if (choose == 4) {
             CarMenu();  // Return to Car menu
@@ -2981,15 +3011,14 @@ void ArchieveData() {
         res = mysql_store_result(conn);
 
         cout << "\n\n";
-        cout << setw(37) << "" << "---------------------------------------------\n";
-        cout << setw(37) << "";
-        printf("| %-5s | %-15s | %-15s | %-15s | %-15s | %-15s | %-15s |\n", "Rent ID", "Car ID", "Cust ID", "Rent_Date", "Return_Date", "Total Price", "Rent_Status");
-        cout << setw(83) << "---------------------------------------------\n";
-
+        cout << setw(8) << "" << "-----------------------------------------------------------------------------------------------------\n";
+        cout << setw(8) << "";
+        printf("| %-8s | %-8s | %-8s | %-13s | %-13s | %-12s | %-17s |\n", "Rent ID", "Car ID", "Cust ID", "Rent_Date", "Return_Date", "Total Price", "Rent_Status");
+        cout << setw(8) << "" << "-----------------------------------------------------------------------------------------------------\n";
         while ((row = mysql_fetch_row(res))) {
-            cout << setw(37) << "";
-            printf("| %-5s | %-15s | %-15s | %-15s | %-15s | %-15s | %-15s |\n", row[0], row[1], row[2], row[3], row[4], row[5], row[6]);
-            cout << setw(83) << "---------------------------------------------\n";
+            cout << setw(8) << "";
+            printf("| %-8s | %-8s | %-8s | %-13s | %-13s | %-12s | %-17s |\n", row[0], row[1], row[2], row[3], row[4], row[5], row[6]);
+            cout << setw(8) << "" << "-----------------------------------------------------------------------------------------------------\n";
         }
 
 
@@ -3933,29 +3962,66 @@ void CarUpdate() {
             const char* q = update_query.c_str();
             qstate = mysql_query(conn, q);
         }
-        else  if (choose == 3)
+        else if (choose == 3)
         {
             int choice = 0;
+            bool tryAgain = true;
 
-            while (choice != 1 && choice != 2) {
+            while (tryAgain) {
+                // Display the menu
                 cout << endl << endl << setw(65) << "Update Car Status" << endl;
-                cout << endl << endl << setw(60) << "1. Available" << endl;
-                cout << endl << endl << setw(57) << "2. Rented" << endl;
-                cout << endl << endl << setw(57) << "3. Reject" << endl;
-                cout << endl << endl << setw(71) << "Enter your choice (1 or 2): ";
+                cout << endl << endl << setw(65) << "1. Available" << endl;
+                cout << endl << endl << setw(62) << "2. Rented" << endl;
+                cout << endl << endl << setw(62) << "3. Repair" << endl;
+                cout << endl << endl << setw(71) << "Enter your choice (1, 2, or 3): ";
                 cin >> choice;
 
+                // Check if input is valid
+                if (choice == 1 || choice == 2 || choice == 3) {
+                    tryAgain = false; // Valid choice, exit the loop
+                }
+                else {
+                    cout << endl << endl << setw(75) << "Invalid choice. Please enter 1, 2, or 3." << endl;
 
-                if (choice != 1 && choice != 2) {
-                    cout << "Invalid choice. Please enter 1 or 2." << endl;
+                    // Ask if the user wants to try again
+                    char retryChoice;
+                    cout << endl << endl << setw(72) << "Do you want to try again? (y/n): ";
+                    cin >> retryChoice;
+
+                    // Exit if the user does not want to try again
+                    if (retryChoice == 'n' || retryChoice == 'N') {
+                        MenuCar();
+                        return; // Exit the function
+                    }
                 }
             }
 
-            string newStatus = (choice == 1) ? "Available" : "Rented";
+            // Determine the new status based on user input
+            string newStatus;
+            if (choice == 1) {
+                newStatus = "Available";
+            }
+            else if (choice == 2) {
+                newStatus = "Rented";
+            }
+            else if (choice == 3) {
+                newStatus = "Repair";
+            }
+
+            // Prepare and execute the SQL query to update the car status
             string updateCar_query = "UPDATE car SET Status = '" + newStatus + "' WHERE CarID='" + CarID + "'";
             const char* ca = updateCar_query.c_str();
             qstate = mysql_query(conn, ca);
+
+            // Check for SQL query success
+            if (qstate == 0) {
+                cout << "Car status updated successfully to " << newStatus << "." << endl;
+            }
+            else {
+                cout << "Failed to update car status. Please try again later." << endl;
+            }
         }
+
         else  if (choose == 4)
         {
             CarMenu();
@@ -4394,7 +4460,6 @@ void CustLogin() {
         res = mysql_store_result(conn);
         if (res->row_count == 1)
         {
-            string user, pw;
             while (row = mysql_fetch_row(res))
             {
                 CustID = row[0];
@@ -4492,35 +4557,53 @@ void RentalInCustomer() {
     std::string filePath = "rent.txt"; // Path to the admin file
     welcomeHeader(filePath);
 
+    if (user.empty()) {
+        std::cerr << "\nError: No customer is logged in. Please log in first.\n";
+        RentalInCustomer();
+        return;
+    }
+
+    cout << "\n\n";
+    cout << setw(64) << "Logged In As: " << CustName;
+
     // Variables for customer and rental details
     std::string IC, carID, rentalDateStr, returnDateStr;
     float carPrice;
 
-    // Prompt customer for IC
-    std::cout << "\n\n" << std::setw(65) << "Enter Your IC: ";
-    std::cin >> IC;
+    // Validate Customer IC
+    while (true) {
+        std::cout << "\n\n" << std::setw(65) << "Enter Your IC: ";
+        std::cin >> IC;
 
-    // Validate customer ID exists
-    std::string query = "SELECT CustID FROM customer WHERE IC = '" + IC + "'";
-    if (mysql_query(conn, query.c_str()) != 0) {
-        std::cerr << "Error executing query: " << mysql_error(conn) << std::endl;
-        RentalInCustomer();
-        return;
-    }
+        // Validate customer ID exists and matches the logged-in customer's ID
+        std::string query = "SELECT CustID FROM customer WHERE IC = '" + IC + "'";
+        if (mysql_query(conn, query.c_str()) != 0) {
+            std::cerr << "Error executing query: " << mysql_error(conn) << std::endl;
+            continue; // Allow retry
+        }
 
-    MYSQL_RES* res = mysql_store_result(conn);
-    MYSQL_ROW row = mysql_fetch_row(res);
+        MYSQL_RES* res = mysql_store_result(conn);
+        MYSQL_ROW row = mysql_fetch_row(res);
 
-    if (!row) {
-        cout << "\n";
-        cout << setw(77) << "Invalid Customer IC. Please try again.";
+        if (!row) {
+            std::cout << "\n";
+            std::cout << std::setw(83) << "Invalid Customer IC. Please try again.\n";
+            mysql_free_result(res);
+            continue; // Allow retry
+        }
+
+        std::string inputCustID = row[0];
         mysql_free_result(res);
-        RentalInCustomer();
-        return;
-    }
 
-    std::string custID = row[0];
-    mysql_free_result(res);
+        // Check if the IC matches the logged-in customer's CustID
+        if (inputCustID != CustID) {
+            cout << "\n";
+            cout << setw(109) << "Error: The entered IC does not belong to the logged-in customer. Please enter the correct IC.";
+            continue; // Allow retry
+        }
+
+        break; // Exit loop if IC is valid and matches the logged-in customer
+    }
 
     // Prompt for rental dates
     std::cout << "\n\n" << std::setw(75) << "Enter Rental Date (YYYY-MM-DD): ";
@@ -4531,19 +4614,45 @@ void RentalInCustomer() {
     // Validate rental dates
     std::tm rentalDate = {}, returnDate = {};
     if (!stringToTm(rentalDateStr, rentalDate) || !stringToTm(returnDateStr, returnDate)) {
-        std::cerr << "\nInvalid date format. Please use YYYY-MM-DD.\n";
-        RentalInCustomer();
+        cout << "\n";
+        cout << setw(82) << "Invalid date format. Please use YYYY-MM-DD.\n";
+        char choice;
+        cout << "\n";
+        cout << setw(78) << "Would you like to try again? (y/n): ";
+        std::cin >> choice;
+
+        if (choice == 'Y' || choice == 'y') {
+            RentalInCustomer();
+        }
+        else {
+            CustPage();
+        }
         return;
     }
 
+    // Validate date logic
     if (!isDateValid(rentalDate, returnDate)) {
-        std::cerr << "\nInvalid dates entered. Ensure the rental date is today or later, and the return date is after the rental date.\n";
-        RentalInCustomer();
+        cout << "\n";
+        cout << setw(113) << "Invalid dates entered. Ensure the rental date is today or later, and the return date is after the rental date.\n";
+        char choice;
+        cout << "\n";
+        cout << setw(80) << "Would you like to try again? (y/n): ";
+        std::cin >> choice;
+
+        if (choice == 'Y' || choice == 'y') {
+            RentalInCustomer();
+        }
+        else {
+            CustPage();
+        }
         return;
     }
+    cout << "\n";
+    cout << setw(79) << "Dates are valid. Proceeding...\n";
+    // Continue with the rest of your logic
 
     // Display available cars for the selected dates
-    query = "SELECT car.*, carcat.CarBrand, carcat.Model "
+    std::string query = "SELECT car.*, carcat.CarBrand, carcat.Model "
         "FROM car JOIN carcat ON car.CatID = carcat.CatID "
         "WHERE car.Status = 'Available' AND car.CarID NOT IN ("
         "SELECT CarID FROM rent WHERE "
@@ -4557,15 +4666,21 @@ void RentalInCustomer() {
         return;
     }
 
-    res = mysql_store_result(conn);
-    cout << "\nAvailable Cars:\n";
-    cout << "---------------------------------------------------------------------------------------------\n";
+    MYSQL_RES* res = mysql_store_result(conn);
+    cout << "\n\n";
+    cout << setw(71) << "Available Cars:\n";
+    cout << "\n";
+    cout << setw(106) << "-------------------------------------------------------------------------------------\n";
+    cout << setw(20) << "";
     printf("| %-3s | %-10s | %-13s | %-15s | %-15s | %-10s |\n", "ID", "Car Brand", "Model", "Plate", "Price", "Status");
-    cout << "---------------------------------------------------------------------------------------------\n";
+    cout << setw(106) << "-------------------------------------------------------------------------------------\n";
 
     bool hasAvailableCars = false;
+    MYSQL_ROW row;
     while ((row = mysql_fetch_row(res))) {
+        cout << setw(20) << "";
         printf("| %-3s | %-10s | %-13s | %-15s | %-15s | %-10s |\n", row[0], row[5], row[6], row[1], row[2], row[3]);
+        cout << setw(106) << "-------------------------------------------------------------------------------------\n";
         hasAvailableCars = true;
     }
     mysql_free_result(res);
@@ -4629,7 +4744,7 @@ void RentalInCustomer() {
 
     if (confirm == 'y' || confirm == 'Y') {
         std::string rentStatus = "Pending";
-        query = "INSERT INTO rent (CustID, CarID, Rent_Date, Return_Date, TotalPrice, Rent_Status) VALUES ('" + custID + "', '" + carID + "', '" + rentalDateStr + "','" + returnDateStr + "', " + std::to_string(discountedPrice) + ", '" + rentStatus + "')";
+        query = "INSERT INTO rent (CustID, CarID, Rent_Date, Return_Date, TotalPrice, Rent_Status) VALUES ('" + CustID + "', '" + carID + "', '" + rentalDateStr + "','" + returnDateStr + "', " + std::to_string(discountedPrice) + ", '" + rentStatus + "')";
         if (mysql_query(conn, query.c_str()) != 0) {
             std::cerr << "\nError processing rental: " << mysql_error(conn) << std::endl;
         }
@@ -4642,7 +4757,7 @@ void RentalInCustomer() {
             cout << setw(92) << "                      Transaction Details                   \n";
             cout << setw(92) << "------------------------------------------------------------\n";
             cout << "\n";
-            cout << setw(66) << "  Customer IC: " << IC << "\n";  // Replace IC with customer name if available
+            cout << setw(66) << "  Customer IC: " << IC << "\n";
             cout << "\n";
             cout << setw(66) << "  Car Brand: " << carBrand << "\n";
             cout << "\n";
@@ -4672,6 +4787,7 @@ void RentalInCustomer() {
         CustPage();
     }
 }
+
 
 
 void DisplayRental(const string& CustID) {
