@@ -198,6 +198,11 @@ void welcomeHeader(const std::string& filePath) {
     }
 }
 
+void SetColor(int color) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, color);
+}
+
 // Function to print a horizontal line
 void printHorizontalLine() {
     cout << setw(97) << "|--------------------------------------------------------------------|" << endl;
@@ -1562,7 +1567,24 @@ void UpdateCar() {
 
         while ((row = mysql_fetch_row(res))) {
             cout << setw(30) << "";
-            printf("| %-3s | %-13s | %-15s | %-11s | \n", row[0], row[1], row[2], row[3]);
+            printf("| %-3s | %-13s | %-15s | ", row[0], row[1], row[2]);
+
+            // Color the "Status" based on its value
+            string status = row[3];
+            if (status == "Available") {
+                SetColor(10); // Green
+            }
+            else if (status == "Rented") {
+                SetColor(14); // Yellow (close to orange)
+            }
+            else if (status == "Repair") {
+                SetColor(4); // Red
+            }
+
+            printf("%-11s", status.c_str());
+            SetColor(7); // Reset to default color
+
+            cout << " |" << endl;
             cout << setw(30) << ""; cout << "-------------------------------------------------------\n";
         }
         cout << endl << endl << setw(66) << "  Choose ID : ";
@@ -1710,7 +1732,7 @@ void UpdateCar() {
 
             // Check for SQL query success
             if (qstate == 0) {
-                cout << "Car status updated successfully to " << newStatus << "." << endl;
+                cout << endl << endl << setw(71) << "Car status updated successfully to " << newStatus << "." << endl;
             }
             else {
                 cout << "Failed to update car status. Please try again later." << endl;
@@ -1721,7 +1743,7 @@ void UpdateCar() {
         }
 
         // Ask if the user wants to update another car
-        cout << endl << setw(85) << "Do you want to update another Car? (y/n): ";
+        cout << endl << setw(81) << "Do you want to update another Car? (y/n): ";
         cin >> option;
 
         if (option == 'y' || option == 'Y') {
@@ -1844,14 +1866,30 @@ void ListCar() {
 
         cout << "\n";
         cout << setw(106) << "===========================================================================================\n";
-        // Display headers with better alignment and spacing
         cout << setw(14) << "";
         printf("| %-5s | %-12s | %-12s | %-13s | %-8s | %-10s | %-9s |\n", "ID", "Car Brand", "Model", "Plate", "Price", "Status", "Cat ID");
         cout << setw(106) << "-------------------------------------------------------------------------------------------\n";
 
         while ((row = mysql_fetch_row(res))) {
             cout << setw(14) << "";
-            printf("| %-5s | %-12s | %-12s | %-13s | %-8s | %-10s | %-9s |\n", row[0], row[5], row[6], row[1], row[2], row[3], row[4]);
+            printf("| %-5s | %-12s | %-12s | %-13s | %-8s | ", row[0], row[5], row[6], row[1], row[2]);
+
+            // Color the Status based on its value
+            std::string status = row[3];
+            if (status == "Available") {
+                SetColor(10); // Green
+            }
+            else if (status == "Rented") {
+                SetColor(14); // Yellow
+            }
+            else if (status == "Repair") {
+                SetColor(12); // Red
+            }
+
+            printf("%-10s", status.c_str());
+            SetColor(7); // Reset to default color
+
+            printf(" | %-9s |\n", row[4]);
             cout << setw(106) << "-------------------------------------------------------------------------------------------\n";
         }
     }
@@ -1862,7 +1900,6 @@ void ListCar() {
     cout << endl << setw(70) << "Press Enter To Back....";
     _getch();
     CarMenu();
-
 }
 
 //Search Car
@@ -3088,7 +3125,7 @@ void ReturnCar() {
         }
 
         // Update rental status to 'returned'
-        std::string update_query = "UPDATE rent SET Rent_Status = 'returned' WHERE RentID = '" + ID + "' ";
+        std::string update_query = "UPDATE rent SET Rent_Status = 'Returned' WHERE RentID = '" + ID + "' ";
         if (mysql_query(conn, update_query.c_str())) {
             std::cerr << "Error updating rental status: " << mysql_error(conn) << std::endl;
             return;
@@ -3140,7 +3177,24 @@ void RentList() {
 
         while ((row = mysql_fetch_row(res))) {
             cout << setw(3) << "";
-            printf("|%-9s | %-7s | %-11s | %-10s | %-10s | %-11s | %-11s | %-14s |\n", row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]);
+            printf("|%-9s | %-7s | %-11s | %-10s | %-10s | %-11s | %-11s | ", row[0], row[1], row[2], row[3], row[4], row[5], row[6]);
+
+            // Color the "Rental Status" based on its value
+            string rentalStatus = row[7];
+            if (rentalStatus == "Approved") {
+                SetColor(10); // Green for "Approved"
+            }
+            else if (rentalStatus == "Pending") {
+                SetColor(6); // Yellow for "Pending"
+            }
+            else if (rentalStatus == "Returned") {
+                SetColor(11); // Yellow for "Returned"
+            }
+
+            printf("%-14s", rentalStatus.c_str());
+            SetColor(7); // Reset to default color
+
+            cout << " |" << endl;
             cout << setw(111) << "-----------------------------------------------------------------------------------------------------------\n";
         }
     }
@@ -4015,7 +4069,7 @@ void CarUpdate() {
 
             // Check for SQL query success
             if (qstate == 0) {
-                cout << "Car status updated successfully to " << newStatus << "." << endl;
+                cout << endl << endl << setw(71) << "Car status updated successfully to " << newStatus << "." << endl;
             }
             else {
                 cout << "Failed to update car status. Please try again later." << endl;
@@ -4027,7 +4081,7 @@ void CarUpdate() {
             CarMenu();
         }
 
-        cout << endl << setw(80) << "Do you want to update other Car? (y/n): ";
+        cout << endl << setw(77) << "Do you want to update other Car? (y/n): ";
         cin >> option;
 
         if (option == 'y' || option == 'Y')
