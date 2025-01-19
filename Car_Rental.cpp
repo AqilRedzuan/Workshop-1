@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -24,7 +25,7 @@ MYSQL_STMT stmt;
 MYSQL_ROW row;
 MYSQL_RES* res;
 string items[20000000];
-string adminId, Employee_ID, CustID, CarID, CatID, RentalID, IC, StaffID, StaffName,CustName;
+string adminId, Employee_ID, CustID, CarID, CatID, RentalID, IC, StaffID, StaffName, CustName;
 string user, pw;
 
 
@@ -94,6 +95,7 @@ void RentalInCustomer();
 void DisplayRental(const string& CustID);
 
 void Report();
+void setConsoleTextColor(int color);
 
 //just empty table
 void table();
@@ -267,9 +269,8 @@ int main() {
         break;
 
     case 4:
-        exit(0);
-
-        std::cout << "\n                                         Do you want to exit the program? (yes/no): ";
+        cout << "\n";
+        cout << setw(81) << "Do you want to exit the program? (yes/no) : ";
         std::cin >> answer;
 
         for (char& c : answer) {
@@ -278,10 +279,21 @@ int main() {
 
         system("cls");
 
-        if (answer == "yes") {
-            std::cout << "\n Exiting the program..." << std::endl;
+        if (answer == "yes" || answer == "y") {
+            ifstream inputFile("thank.txt"); //displaying thank you ASCII image text on output screen fn1353
+            if (!inputFile) {
+                cout << "Cannot open input file.\n";
+            }
+            char str[1000];
+            while (inputFile) {
+                inputFile.getline(str, 1000);
+                if (inputFile)
+                    cout << str << endl;
+            }
+            inputFile.close();
+            std::cout << "\n Logged out successfully\n" << std::endl;
             std::cin.get();
-            exit(0); // Terminate the program with exit code 0 (indicating a successful exit)
+            exit(0); // Terminate the program with exit code 0 (indicating a successful exi
         }
         else {
             main();
@@ -595,6 +607,31 @@ void RegStaff() {
     }
 
     // Rest of your code for validation and database insertion...
+    if (!qstate) {
+        string insertMember_query = "insert into staff (username,password,employee_id,name,email,phone) values ('" + Username + "', '" + Password + "', '" + EmployeeID + "','" + Name + "','" + Email + "','" + Phone + "')";
+        const char* q = insertMember_query.c_str();
+        qstate = mysql_query(conn, q);
+
+        if (!qstate) {
+            cout << "\n\n" << setw(75) << "You have been registered.\n\n";
+            cout << setw(81) << "Do you want to add another Staff? (y/n): ";
+            cin >> option;
+
+            if (option == 'y' || option == 'Y') {
+                RegStaff();
+            }
+            else {
+                ListStaff();
+            }
+            _getch();
+        }
+        else {
+            cout << "Query Execution Problem!" << mysql_error(conn) << endl;
+        }
+    }
+    else {
+        cout << "Query Execution Problem!" << mysql_error(conn) << endl;
+    }
 }
 
 void UpdateStaff() {
@@ -1050,7 +1087,7 @@ void CarCat() {
     std::string filePath = "admin.txt"; // Path to the admin file
     welcomeHeader(filePath);
     cout << "\n\n\n";
-    cout << setw(70) << "1. Add Category\n\n"; 
+    cout << setw(70) << "1. Add Category\n\n";
     cout << setw(73) << "2. Update Category\n\n";
     cout << setw(73) << "3. Delete Category\n\n";
     cout << setw(62) << "4. Back\n\n";
@@ -1237,7 +1274,7 @@ void UpdateCat() {
             const char* q = update_query.c_str();
             qstate = mysql_query(conn, q);
         }
-        
+
         else if (choose == 2)
         {
             CarCat();
@@ -1250,7 +1287,7 @@ void UpdateCat() {
             UpdateCat();
         else
             ListCat();
-            _getch();
+        _getch();
     }
     else
     {
@@ -1975,7 +2012,7 @@ void CustomerMenu() {
     welcomeHeader(filePath);
 
     cout << setw(300) << " " << endl;
-    cout << setw(75) << "1. Register Customer\n\n"; 
+    cout << setw(75) << "1. Register Customer\n\n";
     cout << setw(73) << "2. Update Customer\n\n";
     cout << setw(73) << "3. Delete Customer\n\n";
     cout << setw(74) << "4. Display Customer\n\n";
@@ -2472,7 +2509,7 @@ void RentalMenu() {
     {
         DeleteRental();
     }
-    else if (choose == 4) 
+    else if (choose == 4)
     {
         ReturnCar();
 
@@ -2536,7 +2573,7 @@ void RentalInAdmin() {
 
 
     bool validCustomer = false;
-    
+
 
     // Loop to retry if the customer ID is invalid
     do {
@@ -2578,272 +2615,272 @@ void RentalInAdmin() {
 
         }
     } while (!validCustomer);
-        // If a valid customer ID is found, fetch the customer name
-        std::string custName;
-        std::string cust_query = "SELECT Name FROM customer WHERE CustID = '" + custID + "'";
-        if (validCustomer) {
-            
-            if (mysql_query(conn, cust_query.c_str()) != 0) {
-                std::cerr << "Error fetching customer name: " << mysql_error(conn) << std::endl;
-            }
-            else {
-                res = mysql_store_result(conn);
-                row = mysql_fetch_row(res);
-                if (row) {
-                    custName = row[0];  // Store the customer name
-                    cout << "\n";
-                    cout << setw(65) << "Customer found: " << custName << std::endl;
-                }
-                mysql_free_result(res);
-            }
+    // If a valid customer ID is found, fetch the customer name
+    std::string custName;
+    std::string cust_query = "SELECT Name FROM customer WHERE CustID = '" + custID + "'";
+    if (validCustomer) {
+
+        if (mysql_query(conn, cust_query.c_str()) != 0) {
+            std::cerr << "Error fetching customer name: " << mysql_error(conn) << std::endl;
         }
         else {
-            std::cout << "No valid customer found. Returning to the previous menu." << std::endl;
-            RentalInAdmin();
-        }
-        printf("\n\n");
-        // Prompt user for car ID
-        qstate = mysql_query(conn, "SELECT car.*, carcat.CarBrand, carcat.Model FROM car JOIN carcat ON car.CatID = carcat.CatID");
-        if (!qstate)
-        {
-            res = mysql_store_result(conn);
-
-            cout << "\n";
-            cout << setw(109) << "-----------------------------------------------------------------------------------------------\n";
-            //data show in box
-            cout << setw(13) << "";
-            printf("| %-4s | %-10s | %-13s | %-15s | %-15s | %-19s | \n", "ID", "Car Brand", "Model", "Plate", "Price", "Status");
-            cout << setw(109) << "-----------------------------------------------------------------------------------------------\n";
-
-            while ((row = mysql_fetch_row(res)))
-            {
-
-                cout << setw(13) << "";
-                printf("| %-4s | %-10s | %-13s | %-15s | %-15s | %-19s | \n", row[0], row[5], row[6], row[1], row[2], row[3]);
-                cout << setw(109) << "-----------------------------------------------------------------------------------------------\n";
-            }
-
-            cout << "\n\n" << setw(64) << "Choose Car ID: ";
-            cin.ignore(1, '\n');
-            getline(cin, CarID);
-
-            // Validate car ID exists and fetch price,status,model and car plate
-            string query = "SELECT car.Price,car.Status,car.Plate, carcat.CarBrand, carcat.Model FROM car JOIN carcat ON car.CatID = carcat.CatID WHERE CarID ='" + CarID + "'";
-            if (mysql_query(conn, query.c_str()) != 0) {
-                std::cerr << "Error executing query: " << mysql_error(conn) << std::endl;
-                mysql_close(conn);
-                return;
-            }
             res = mysql_store_result(conn);
             row = mysql_fetch_row(res);
-            float carPrice = 0.0;
-            int totalDays = 0;
-            float totalPrice = 0.0, discountedPrice = 0.0;
-            string carStatus = "", Plate = "", CarBrand = "", Model = "";
             if (row) {
-                carPrice = atof(row[0]);
-                carStatus = row[1];
-                Plate = row[2];  // Store car plate number
-                CarBrand = row[3];
-                Model = row[4];
+                custName = row[0];  // Store the customer name
+                cout << "\n";
+                cout << setw(65) << "Customer found: " << custName << std::endl;
+            }
+            mysql_free_result(res);
+        }
+    }
+    else {
+        std::cout << "No valid customer found. Returning to the previous menu." << std::endl;
+        RentalInAdmin();
+    }
+    printf("\n\n");
+    // Prompt user for car ID
+    qstate = mysql_query(conn, "SELECT car.*, carcat.CarBrand, carcat.Model FROM car JOIN carcat ON car.CatID = carcat.CatID");
+    if (!qstate)
+    {
+        res = mysql_store_result(conn);
+
+        cout << "\n";
+        cout << setw(109) << "-----------------------------------------------------------------------------------------------\n";
+        //data show in box
+        cout << setw(13) << "";
+        printf("| %-4s | %-10s | %-13s | %-15s | %-15s | %-19s | \n", "ID", "Car Brand", "Model", "Plate", "Price", "Status");
+        cout << setw(109) << "-----------------------------------------------------------------------------------------------\n";
+
+        while ((row = mysql_fetch_row(res)))
+        {
+
+            cout << setw(13) << "";
+            printf("| %-4s | %-10s | %-13s | %-15s | %-15s | %-19s | \n", row[0], row[5], row[6], row[1], row[2], row[3]);
+            cout << setw(109) << "-----------------------------------------------------------------------------------------------\n";
+        }
+
+        cout << "\n\n" << setw(64) << "Choose Car ID: ";
+        cin.ignore(1, '\n');
+        getline(cin, CarID);
+
+        // Validate car ID exists and fetch price,status,model and car plate
+        string query = "SELECT car.Price,car.Status,car.Plate, carcat.CarBrand, carcat.Model FROM car JOIN carcat ON car.CatID = carcat.CatID WHERE CarID ='" + CarID + "'";
+        if (mysql_query(conn, query.c_str()) != 0) {
+            std::cerr << "Error executing query: " << mysql_error(conn) << std::endl;
+            mysql_close(conn);
+            return;
+        }
+        res = mysql_store_result(conn);
+        row = mysql_fetch_row(res);
+        float carPrice = 0.0;
+        int totalDays = 0;
+        float totalPrice = 0.0, discountedPrice = 0.0;
+        string carStatus = "", Plate = "", CarBrand = "", Model = "";
+        if (row) {
+            carPrice = atof(row[0]);
+            carStatus = row[1];
+            Plate = row[2];  // Store car plate number
+            CarBrand = row[3];
+            Model = row[4];
+        }
+        else {
+            std::cerr << "Car with ID " << CarID << " not found!" << std::endl;
+            RentalInAdmin();
+
+        }
+
+        mysql_free_result(res);
+
+        bool isAvailable = (carStatus == "Available");
+        printf("\n\n");
+
+        if (!isAvailable) {
+            std::cout << std::setw(86) << "The selected car is currently rented. Please pick another car." << std::endl;
+            std::cout << "\n";
+            std::cout << std::setw(72) << "Press Enter to continue..." << std::endl;
+
+            // Clear input buffer and wait for Enter key
+            //std::cin.ignore();  // Clear up to 1000 characters or until a newline is encountered
+            std::cin.get();               // Wait for Enter
+
+            RentalInAdmin();  // Call the function to select a different car
+            return;           // Exit the current function
+        }
+
+
+        //rest of the code for rental calculations and display ...
+        if (isAvailable) {
+            // Prompt for rental and return dates
+            std::cout << setw(75) << "Enter Rental Date (YYYY-MM-DD): ";
+            std::cin >> rentalDateStr;
+            std::cout << "\n" << std::setw(75) << "Enter Return Date (YYYY-MM-DD): ";
+            std::cin >> returnDateStr;
+
+            // Convert dates and times to tm structs
+            tm rentalDate = {}, returnDate = {}, pickUpTime = {}, dropOffTime = {};
+            istringstream(rentalDateStr) >> get_time(&rentalDate, "%Y-%m-%d");
+            istringstream(returnDateStr) >> get_time(&returnDate, "%Y-%m-%d");
+            istringstream(pickUpTimeStr) >> get_time(&pickUpTime, "%H:%M");
+            istringstream(dropOffTimeStr) >> get_time(&dropOffTime, "%H:%M");
+
+            // Combine date and time for rental and return
+            rentalDate.tm_hour = pickUpTime.tm_hour;
+            rentalDate.tm_min = pickUpTime.tm_min;
+            returnDate.tm_hour = dropOffTime.tm_hour;
+            returnDate.tm_min = dropOffTime.tm_min;
+
+            // Validate the dates
+            if (!isDateValid(rentalDate, returnDate)) {
+                char choose;
+                std::cout << "\n";
+                cerr << setw(77) << "Error: Invalid dates entered. Ensure the rental date is today or later, and the return date is after the rental date." << endl;
+                cout << endl << setw(78) << "Do you want to try again ? (y/n): ";
+                cin >> choose;
+
+                if (choose == 'y' || choose == 'Y')
+                {
+                    RentalInAdmin();
+                }
+                else
+                {
+                    RentalMenu();
+                }
+            }
+
+            time_t rentalTimeT = mktime(&rentalDate);
+            time_t returnTimeT = mktime(&returnDate);
+            int totalSeconds = difftime(returnTimeT, rentalTimeT);
+
+            // Convert seconds to total days (rounding up for partial days)
+            totalDays = (totalSeconds + 86399) / 86400; // Add 86399 to round up partial days
+
+            // Calculate total price
+            totalPrice = totalDays * carPrice;
+
+            // Apply discount for rentals of 3 or more days
+            if (totalDays >= 3) {
+                float discountRate = 0.10; // 10% discount
+                discountedPrice = totalPrice * (1 - discountRate);
             }
             else {
-                std::cerr << "Car with ID " << CarID << " not found!" << std::endl;
-                RentalInAdmin();
-
+                discountedPrice = totalPrice; // No discount
             }
 
-            mysql_free_result(res);
+            // Display details and prices
+            system("cls");
+            std::string filePath = "rent.txt"; // Path to the admin file
+            welcomeHeader(filePath);
+            std::cout << "\n\n";
+            std::cout << std::setw(89) << "     |-------------------------------------------------------|" << std::endl;
+            std::cout << std::setw(89) << "     |                  Car Rental Details                   |" << std::endl;
+            std::cout << std::setw(90) << "     |-------------------------------------------------------|\n" << std::endl;
+            std::cout << std::setw(56) << " Customer Name:    " << std::setw(23) << custName << "\n" << std::endl;
+            std::cout << std::setw(49) << " Car Brand: " << std::setw(29) << CarBrand << "\n" << std::endl;
+            std::cout << std::setw(56) << " Car Plate Number: " << std::setw(23) << Plate << "\n" << std::endl;
+            std::cout << std::setw(56) << " Rental Date:      " << std::setw(26) << rentalDateStr << "\n" << std::endl;
+            std::cout << std::setw(55) << " Return Date:     " << std::setw(27) << returnDateStr << "\n" << std::endl;
+            std::cout << std::setw(75) << " Total Price:                      RM " << std::setw(5) << totalPrice << "\n" << std::endl;
 
-            bool isAvailable = (carStatus == "Available");
-            printf("\n\n");
-
-            if (!isAvailable) {
-                std::cout << std::setw(86) << "The selected car is currently rented. Please pick another car." << std::endl;
-                std::cout << "\n";
-                std::cout << std::setw(72) << "Press Enter to continue..." << std::endl;
-
-                // Clear input buffer and wait for Enter key
-                //std::cin.ignore();  // Clear up to 1000 characters or until a newline is encountered
-                std::cin.get();               // Wait for Enter
-
-                RentalInAdmin();  // Call the function to select a different car
-                return;           // Exit the current function
+            if (totalDays >= 3) {
+                std::cout << std::setw(74) << " Total price (with 10% discount):  RM"
+                    << std::setw(static_cast<std::streamsize>(8) - 2) << discountedPrice << "\n" << std::endl;
             }
 
+            std::cout << std::setw(89) << "   |-------------------------------------------------------|" << std::endl;
+            // Prompt for rental confirmation
+            cout << "\n";
+            std::cout << std::setw(73) << "Confirm Rental (y/n): ";
+            char confirm;
+            std::cin >> confirm;
 
-            //rest of the code for rental calculations and display ...
-            if (isAvailable) {
-                // Prompt for rental and return dates
-                std::cout << setw(75) << "Enter Rental Date (YYYY-MM-DD): ";
-                std::cin >> rentalDateStr;
-                std::cout << "\n" << std::setw(75) << "Enter Return Date (YYYY-MM-DD): ";
-                std::cin >> returnDateStr;
+            // If confirmed, insert rental into database
+            if (confirm == 'y' || confirm == 'Y') {
+                string Rent_Status = "Approved";
+                query = "INSERT INTO rent (CustID, CarID, Rent_Date, Return_Date,TotalPrice,Rent_Status) VALUES ('" + custID + "', '" + CarID + "', '" + rentalDateStr + "','" + returnDateStr + "'," + std::to_string(totalPrice) + ",'" + Rent_Status + "')";
+                if (mysql_query(conn, query.c_str()) != 0) {
+                    std::cerr << "Error adding rental: " << mysql_error(conn) << std::endl;
 
-                // Convert dates and times to tm structs
-                tm rentalDate = {}, returnDate = {}, pickUpTime = {}, dropOffTime = {};
-                istringstream(rentalDateStr) >> get_time(&rentalDate, "%Y-%m-%d");
-                istringstream(returnDateStr) >> get_time(&returnDate, "%Y-%m-%d");
-                istringstream(pickUpTimeStr) >> get_time(&pickUpTime, "%H:%M");
-                istringstream(dropOffTimeStr) >> get_time(&dropOffTime, "%H:%M");
-
-                // Combine date and time for rental and return
-                rentalDate.tm_hour = pickUpTime.tm_hour;
-                rentalDate.tm_min = pickUpTime.tm_min;
-                returnDate.tm_hour = dropOffTime.tm_hour;
-                returnDate.tm_min = dropOffTime.tm_min;
-
-                // Validate the dates
-                if (!isDateValid(rentalDate, returnDate)) {
-                    char choose;
-                    std::cout << "\n";
-                    cerr << setw(77) << "Error: Invalid dates entered. Ensure the rental date is today or later, and the return date is after the rental date." << endl;
-                    cout << endl << setw(78) << "Do you want to try again ? (y/n): ";
-                    cin >> choose;
-
-                    if (choose == 'y' || choose == 'Y')
-                    {
-                        RentalInAdmin();
-                    }
-                    else
-                    {
-                        RentalMenu();
-                    }
                 }
 
-                time_t rentalTimeT = mktime(&rentalDate);
-                time_t returnTimeT = mktime(&returnDate);
-                int totalSeconds = difftime(returnTimeT, rentalTimeT);
-
-                // Convert seconds to total days (rounding up for partial days)
-                totalDays = (totalSeconds + 86399) / 86400; // Add 86399 to round up partial days
-
-                // Calculate total price
-                totalPrice = totalDays * carPrice;
-
-                // Apply discount for rentals of 3 or more days
-                if (totalDays >= 3) {
-                    float discountRate = 0.10; // 10% discount
-                    discountedPrice = totalPrice * (1 - discountRate);
-                }
                 else {
-                    discountedPrice = totalPrice; // No discount
-                }
+                    std::cout << setw(84) << "\n\t\tRental successfully! Please make sure customer pay at the counter!" << std::endl;
+                    // Fetch and display transaction details
+                    std::string fetchQuery = "SELECT rent.RentID, customer.Name, carcat.CarBrand, car.Plate, rent.Rent_Date, rent.Return_Date, rent.TotalPrice FROM rent JOIN customer ON rent.CustID = customer.CustID JOIN car ON rent.CarID = car.CarID JOIN carcat ON car.CatID = carcat.CatID ORDER BY RentID DESC LIMIT 1";
+                    if (mysql_query(conn, fetchQuery.c_str()) != 0) {
+                        std::cerr << "Error executing query: " << mysql_error(conn) << std::endl;
+                        mysql_close(conn);
+                        return;
 
-                // Display details and prices
-                system("cls");
-                std::string filePath = "rent.txt"; // Path to the admin file
-                welcomeHeader(filePath);
-                std::cout << "\n\n";
-                std::cout << std::setw(89) << "     |-------------------------------------------------------|" << std::endl;
-                std::cout << std::setw(89) << "     |                  Car Rental Details                   |" << std::endl;
-                std::cout << std::setw(90) << "     |-------------------------------------------------------|\n" << std::endl;
-                std::cout << std::setw(56) << " Customer Name:    " << std::setw(20) << custName << "\n" << std::endl;
-                std::cout << std::setw(49) << " Car Brand: " << std::setw(28) << CarBrand << "\n" << std::endl;
-                std::cout << std::setw(56) << " Car Plate Number: " << std::setw(24) << Plate << "\n" << std::endl;
-                std::cout << std::setw(56) << " Rental Date:      " << std::setw(26) << rentalDateStr << "\n" << std::endl;
-                std::cout << std::setw(55) << " Return Date:     " << std::setw(27) << returnDateStr << "\n" << std::endl;
-                std::cout << std::setw(75) << " Total Price:                      RM " << std::setw(5) << totalPrice << "\n" << std::endl;
+                    }
+                    res = mysql_store_result(conn);
+                    row = mysql_fetch_row(res);
+                    float total_price = 0.0;
+                    string rentalID = "", custName = "", carStatus = "", carPlate = "", brand = "", rental_date = "", return_date = "";
+                    if (row) {
+                        rentalID = row[0];
+                        custName = row[1];
+                        brand = row[2];  // Store car plate number
+                        carPlate = row[3];
+                        rental_date = row[4];
+                        return_date = row[5];
+                        total_price = atof(row[6]);
 
-                if (totalDays >= 3) {
-                    std::cout << std::setw(74) << " Total price (with 10% discount):  RM"
-                        << std::setw(static_cast<std::streamsize>(8) - 2) << discountedPrice << "\n" << std::endl;
-                }
+                        system("cls");
+                        std::string filePath = "rent.txt"; // Path to the admin file
+                        welcomeHeader(filePath);
 
-                std::cout << std::setw(89) << "   |-------------------------------------------------------|" << std::endl;
-                // Prompt for rental confirmation
-                cout << "\n";
-                std::cout << std::setw(73) << "Confirm Rental (y/n): ";
-                char confirm;
-                std::cin >> confirm;
+                        std::cout << "\n\n";
+                        std::cout << std::setw(89) << "     |-------------------------------------------------------|" << std::endl;
+                        std::cout << std::setw(89) << "     |                  Transaction Details                  |" << std::endl;
+                        std::cout << std::setw(90) << "     |-------------------------------------------------------|\n" << std::endl;
+                        std::cout << std::setw(56) << " Customer Name:    " << std::setw(23) << custName << "\n" << std::endl;
+                        std::cout << std::setw(49) << " Car Brand: " << std::setw(29) << CarBrand << "\n" << std::endl;
+                        std::cout << std::setw(56) << " Car Plate Number: " << std::setw(23) << Plate << "\n" << std::endl;
+                        std::cout << std::setw(56) << " Rental Date:      " << std::setw(26) << rentalDateStr << "\n" << std::endl;
+                        std::cout << std::setw(55) << " Return Date:     " << std::setw(27) << returnDateStr << "\n" << std::endl;
+                        std::cout << std::setw(75) << " Total Price:                      RM " << std::setw(5) << totalPrice << "\n" << std::endl;
 
-                // If confirmed, insert rental into database
-                if (confirm == 'y' || confirm == 'Y') {
-                    string Rent_Status = "Approved";
-                    query = "INSERT INTO rent (CustID, CarID, Rent_Date, Return_Date,TotalPrice,Rent_Status) VALUES ('" + custID + "', '" + CarID + "', '" + rentalDateStr + "','" + returnDateStr + "'," + std::to_string(totalPrice) + ",'" + Rent_Status + "')";
-                    if (mysql_query(conn, query.c_str()) != 0) {
-                        std::cerr << "Error adding rental: " << mysql_error(conn) << std::endl;
-
+                        if (totalDays >= 3) {
+                            std::cout << std::setw(74) << " Total price (with 10% discount):  RM"
+                                << std::setw(static_cast<std::streamsize>(8) - 2) << discountedPrice << "\n" << std::endl;
+                        }
+                        std::cout << std::setw(89) << "   |-------------------------------------------------------|" << std::endl;
                     }
 
                     else {
-                        std::cout << setw(84) << "\n\t\tRental successfully! Please make sure customer pay at the counter!" << std::endl;
-                        // Fetch and display transaction details
-                        std::string fetchQuery = "SELECT rent.RentID, customer.Name, carcat.CarBrand, car.Plate, rent.Rent_Date, rent.Return_Date, rent.TotalPrice FROM rent JOIN customer ON rent.CustID = customer.CustID JOIN car ON rent.CarID = car.CarID JOIN carcat ON car.CatID = carcat.CatID ORDER BY RentID DESC LIMIT 1";
-                        if (mysql_query(conn, fetchQuery.c_str()) != 0) {
-                            std::cerr << "Error executing query: " << mysql_error(conn) << std::endl;
-                            mysql_close(conn);
-                            return;
+                        std::cerr << "Error fetching transaction" << std::endl;
+                        mysql_close(conn);
 
-                        }
-                        res = mysql_store_result(conn);
-                        row = mysql_fetch_row(res);
-                        float total_price = 0.0;
-                        string rentalID = "", custName = "", carStatus = "", carPlate = "", brand = "", rental_date = "", return_date = "";
-                        if (row) {
-                            rentalID = row[0];
-                            custName = row[1];
-                            brand = row[2];  // Store car plate number
-                            carPlate = row[3];
-                            rental_date = row[4];
-                            return_date = row[5];
-                            total_price = atof(row[6]);
+                    }
+                    mysql_free_result(res);
+                    cout << "\n";
+                    cout << setw(75) << "Update the car status ? (y/n): ";
+                    char option;
+                    cin >> option;
 
-                            system("cls");
-                            std::string filePath = "rent.txt"; // Path to the admin file
-                            welcomeHeader(filePath);
+                    if (option == 'y' || option == 'Y')
+                    {
+                        UpdateCar(); //in admin
+                    }
+                    else
+                    {
 
-                            std::cout << "\n\n";
-                            std::cout << std::setw(89) << "     |-------------------------------------------------------|" << std::endl;
-                            std::cout << std::setw(89) << "     |                  Transaction Details                  |" << std::endl;
-                            std::cout << std::setw(90) << "     |-------------------------------------------------------|\n" << std::endl;
-                            std::cout << std::setw(56) << " Customer Name:    " << std::setw(20) << custName << "\n" << std::endl;
-                            std::cout << std::setw(49) << " Car Brand: " << std::setw(28) << CarBrand << "\n" << std::endl;
-                            std::cout << std::setw(56) << " Car Plate Number: " << std::setw(24) << Plate << "\n" << std::endl;
-                            std::cout << std::setw(56) << " Rental Date:      " << std::setw(26) << rentalDateStr << "\n" << std::endl;
-                            std::cout << std::setw(55) << " Return Date:     " << std::setw(27) << returnDateStr << "\n" << std::endl;
-                            std::cout << std::setw(75) << " Total Price:                      RM " << std::setw(5) << totalPrice << "\n" << std::endl;
-
-                            if (totalDays >= 3) {
-                                std::cout << std::setw(74) << " Total price (with 10% discount):  RM"
-                                    << std::setw(static_cast<std::streamsize>(8) - 2) << discountedPrice << "\n" << std::endl;
-                            }
-                            std::cout << std::setw(89) << "   |-------------------------------------------------------|" << std::endl;
-                        }
-
-                        else {
-                            std::cerr << "Error fetching transaction" << std::endl;
-                            mysql_close(conn);
-
-                        }
-                        mysql_free_result(res);
-                        cout << "\n";
-                        cout << setw(75) << "Update the car status ? (y/n): ";
-                        char option;
-                        cin >> option;
-
-                        if (option == 'y' || option == 'Y')
-                        {
-                            UpdateCar(); //in admin
-                        }
-                        else
-                        {
-
-                            RentalMenu();
-                        }
+                        RentalMenu();
                     }
                 }
-                else if (confirm == 'n' || confirm == 'N') {
-                    std::cout << std::setw(79) << "Rental was not confirmed. Returning to the main menu." << std::endl;
-                    RentalInAdmin(); // Return to the main menu or exit the function
-                }
-                else {
-                    std::cerr << "Invalid input. Please enter 'y' or 'n'." << std::endl;
-                    // You can repeat the confirmation prompt if needed
-                }
+            }
+            else if (confirm == 'n' || confirm == 'N') {
+                std::cout << std::setw(79) << "Rental was not confirmed. Returning to the main menu." << std::endl;
+                RentalInAdmin(); // Return to the main menu or exit the function
+            }
+            else {
+                std::cerr << "Invalid input. Please enter 'y' or 'n'." << std::endl;
+                // You can repeat the confirmation prompt if needed
             }
         }
-    
+    }
+
 }
 
 void UpdateRentalA() {
@@ -4355,8 +4392,19 @@ void UpdateRentalS() {
     case 2: rentStatus = "Returned"; break;
     case 3: rentStatus = "Pending"; break;
     default:
-        std::cerr << "Invalid choice, please enter a number between 1 and 3." << std::endl;
-        UpdateRentalS();
+        cout << "\n";
+        cout << setw(86) << "Invalid choice, please enter a number between 1 and 3." << std::endl;
+        char retryChoice;
+        cout << "\n";
+        cout << setw(78) << "Do you want to retry? (y/n): ";
+        std::cin >> retryChoice;
+
+        if (retryChoice == 'y' || retryChoice == 'Y') {
+            UpdateRentalS();  // Go back to update rental
+        }
+        else {
+            StaffPage();  // Go to staff page
+        }
         return;
     }
 
@@ -4524,7 +4572,7 @@ void CustLogin() {
 
             if (user == custusername && pw == custpassword)
                 CustPage();
-                _getch();
+            _getch();
         }
 
         char c;
@@ -4602,6 +4650,11 @@ void CustPage() {
     }
 }
 
+void setConsoleTextColor(int color) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, color);
+}
+
 void RentalInCustomer() {
     std::string answer;
 
@@ -4610,71 +4663,37 @@ void RentalInCustomer() {
     cout << "\n";
     std::string filePath = "rent.txt"; // Path to the admin file
     welcomeHeader(filePath);
+    // Variables for customer and rental details
+    std::string IC, carID, rentalDateStr, returnDateStr;
+    float carPrice;
 
+    // Check if a customer is logged in
     if (user.empty()) {
         std::cerr << "\nError: No customer is logged in. Please log in first.\n";
-        RentalInCustomer();
+        CustLogin();
         return;
     }
 
     cout << "\n\n";
     cout << setw(64) << "Logged In As: " << CustName;
 
-    // Variables for customer and rental details
-    std::string IC, carID, rentalDateStr, returnDateStr;
-    float carPrice;
 
-    // Validate Customer IC
-    while (true) {
-        std::cout << "\n\n" << std::setw(65) << "Enter Your IC: ";
-        std::cin >> IC;
+    // Display message showing IC
+    cout << "\n\n" << setw(64) << "Your IC: " << user;
 
-        // Validate customer ID exists and matches the logged-in customer's ID
-        std::string query = "SELECT CustID FROM customer WHERE IC = '" + IC + "'";
-        if (mysql_query(conn, query.c_str()) != 0) {
-            std::cerr << "Error executing query: " << mysql_error(conn) << std::endl;
-            continue; // Allow retry
-        }
-
-        MYSQL_RES* res = mysql_store_result(conn);
-        MYSQL_ROW row = mysql_fetch_row(res);
-
-        if (!row) {
-            std::cout << "\n";
-            std::cout << std::setw(83) << "Invalid Customer IC. Please try again.\n";
-            mysql_free_result(res);
-            continue; // Allow retry
-        }
-
-        std::string inputCustID = row[0];
-        mysql_free_result(res);
-
-        // Check if the IC matches the logged-in customer's CustID
-        if (inputCustID != CustID) {
-            cout << "\n";
-            cout << setw(109) << "Error: The entered IC does not belong to the logged-in customer. Please enter the correct IC.";
-            continue; // Allow retry
-        }
-
-        break; // Exit loop if IC is valid and matches the logged-in customer
-    }
-
-    // Prompt for rental dates
+    // Rental date inputs
     std::cout << "\n\n" << std::setw(75) << "Enter Rental Date (YYYY-MM-DD): ";
     std::cin >> rentalDateStr;
     std::cout << "\n" << std::setw(75) << "Enter Return Date (YYYY-MM-DD): ";
     std::cin >> returnDateStr;
 
-    // Validate rental dates
+    // Validate and process rental dates
     std::tm rentalDate = {}, returnDate = {};
     if (!stringToTm(rentalDateStr, rentalDate) || !stringToTm(returnDateStr, returnDate)) {
-        cout << "\n";
-        cout << setw(82) << "Invalid date format. Please use YYYY-MM-DD.\n";
+        cout << "\nInvalid date format. Please use YYYY-MM-DD.\n";
         char choice;
-        cout << "\n";
-        cout << setw(78) << "Would you like to try again? (y/n): ";
+        cout << "\nWould you like to try again? (y/n): ";
         std::cin >> choice;
-
         if (choice == 'Y' || choice == 'y') {
             RentalInCustomer();
         }
@@ -4684,15 +4703,11 @@ void RentalInCustomer() {
         return;
     }
 
-    // Validate date logic
     if (!isDateValid(rentalDate, returnDate)) {
-        cout << "\n";
-        cout << setw(113) << "Invalid dates entered. Ensure the rental date is today or later, and the return date is after the rental date.\n";
+        cout << "\nInvalid dates. Rental date must be today or later, and return date must be after the rental date.\n";
         char choice;
-        cout << "\n";
-        cout << setw(80) << "Would you like to try again? (y/n): ";
+        cout << "\nWould you like to try again? (y/n): ";
         std::cin >> choice;
-
         if (choice == 'Y' || choice == 'y') {
             RentalInCustomer();
         }
@@ -4701,8 +4716,10 @@ void RentalInCustomer() {
         }
         return;
     }
+
+    // Use IC for rental process
     cout << "\n";
-    cout << setw(79) << "Dates are valid. Proceeding...\n";
+    cout << setw(66) << "Proceeding with IC: " << user << "\n";
     // Continue with the rest of your logic
 
     // Display available cars for the selected dates
@@ -4752,7 +4769,8 @@ void RentalInCustomer() {
 
     // Validate car ID
     query = "SELECT car.Price, car.Status, car.Plate, carcat.CarBrand, carcat.Model "
-        "FROM car JOIN carcat ON car.CatID = carcat.CatID WHERE CarID ='" + carID + "' LIMIT 1";
+            "FROM car JOIN carcat ON car.CatID = carcat.CatID "
+            "WHERE CarID = '" + carID + "' AND car.Status = 'Available' LIMIT 1";
     if (mysql_query(conn, query.c_str()) != 0) {
         std::cerr << "\nError executing query: " << mysql_error(conn) << std::endl;
         RentalInCustomer();
@@ -4762,10 +4780,19 @@ void RentalInCustomer() {
     res = mysql_store_result(conn);
     row = mysql_fetch_row(res);
     if (!row) {
-        std::cerr << "\nCar with ID " << carID << " not found or unavailable. Please try again.\n";
-        mysql_free_result(res);
-        RentalInCustomer();
+        char retryChoice;
+        cout << "\n";
+        cout << setw(45) << "Car with ID " << carID << " not found or unavailable. Please try again. (y/n): ";
+        std::cin >> retryChoice;
+
+        if (retryChoice == 'y' || retryChoice == 'Y') {
+            RentalInCustomer();  // Go back to update rental
+        }
+        else {
+            CustPage();  // Go to customer page
+        }
         return;
+
     }
 
     carPrice = atof(row[0]);
@@ -4811,7 +4838,7 @@ void RentalInCustomer() {
             cout << setw(92) << "                      Transaction Details                   \n";
             cout << setw(92) << "------------------------------------------------------------\n";
             cout << "\n";
-            cout << setw(66) << "  Customer IC: " << IC << "\n";
+            cout << setw(66) << "  Customer IC: " << user << "\n";
             cout << "\n";
             cout << setw(66) << "  Car Brand: " << carBrand << "\n";
             cout << "\n";
@@ -4824,7 +4851,9 @@ void RentalInCustomer() {
             cout << setw(69) << "  Total Price: RM " << totalPrice << "\n";
             cout << "\n";
             if (totalDays >= 3) {
+                setConsoleTextColor(6); // Orange color in Windows console
                 cout << setw(69) << "  Total Price (with 10% discount): RM " << discountedPrice << "\n";
+                setConsoleTextColor(7); // Reset to default color (usually white)
             }
             cout << "\n";
             cout << setw(92) << "------------------------------------------------------------\n";
@@ -4887,6 +4916,7 @@ void DisplayRental(const string& CustID) {
 }
 
 //inadmin
+
 void Report() {
     db_response::ConnectionFunction();
     system("cls");
@@ -4897,44 +4927,100 @@ void Report() {
     cout << "\n\n";
     cout << setw(72) << "1. Sales Revenue \n\n";
     cout << setw(74) << "2. Most rented car \n\n";
-    cout << setw(63) << "3. Back \n\n";
+    cout << setw(73) << "3. Monthly report \n\n";
+    cout << setw(63) << "4. Back \n\n";
     cout << setw(87) << "----------------------------------------------\n" << endl;
     cout << setw(77) << "Please Enter Your Choice : ";
     cin >> choose;
+
     if (choose == 1) {
-system("cls");
-    std::string filePath = "admin.txt";
-    welcomeHeader(filePath);
+        system("cls");
+        welcomeHeader(filePath);
 
-    std::string startDate, endDate;
-    std::cout << "\n\n" << std::setw(71) << "Enter start date (YYYY-MM-DD): ";
-    std::cin >> startDate;
+        std::string startDate, endDate;
+        std::cout << "\n\n" << std::setw(71) << "Enter start date (YYYY-MM-DD): ";
+        std::cin >> startDate;
 
-    std::cout << "\n" << std::setw(71) << "Enter end date (YYYY-MM-DD): ";
-    std::cin >> endDate;
-    std::cout << "\n\n";
+        std::cout << "\n" << std::setw(71) << "Enter end date (YYYY-MM-DD): ";
+        std::cin >> endDate;
+        std::cout << "\n\n";
 
-    if (!calculateSalesRevenueByDateRange(conn, startDate, endDate)) {
-        std::cerr << "Error calculating sales revenue\n";
-        mysql_close(conn);
-        return;
-    }
+        // Calculate sales revenue
+        if (!calculateSalesRevenueByDateRange(conn, startDate, endDate)) {
+            std::cerr << "Error calculating sales revenue\n";
+            mysql_close(conn);
+            return;
+        }
 
-    char choose;
-    std::cout << "\n\n" << std::setw(70) << "Continue? (y/n): ";
-    std::cin >> choose;
+        // Generate revenue graph (Text-based bar chart)
+        std::string query = "SELECT DAY(Rent_Date), SUM(TotalPrice) FROM rent "
+            "WHERE Rent_Date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+            "GROUP BY DAY(Rent_Date) ORDER BY DAY(Rent_Date)";
 
-    if (choose == 'y' || choose == 'Y') {
-        Report();
-    } else {
-        AdminMenu();
-    }
+        if (mysql_query(conn, query.c_str())) {
+            std::cerr << "Error executing query: " << mysql_error(conn) << std::endl;
+            mysql_close(conn);
+            return;
+        }
 
+        MYSQL_RES* result = mysql_store_result(conn);
+        if (!result) {
+            std::cerr << "Error fetching result: " << mysql_error(conn) << std::endl;
+            mysql_close(conn);
+            return;
+        }
+
+        // Find the maximum revenue to scale bars proportionally
+        double maxRevenue = 0.0;
+        MYSQL_ROW row;
+        while ((row = mysql_fetch_row(result))) {
+            double revenue = std::stod(row[1]);
+            if (revenue > maxRevenue) {
+                maxRevenue = revenue;
+            }
+        }
+
+        // Free the result set and store the data again
+        mysql_free_result(result);
+        result = mysql_store_result(conn);  // Re-fetch the result
+
+        // Print the graph header
+        std::cout << "\nRevenue Graph for " << startDate << " to " << endDate << ":\n";
+        std::cout << "--------------------------------------------\n";
+
+        const int maxBarLength = 50;  // Max length of the bar in characters
+        while ((row = mysql_fetch_row(result))) {
+            int day = std::stoi(row[0]);
+            double revenue = std::stod(row[1]);
+
+            // Scale the revenue to the bar length
+            int barLength = static_cast<int>((revenue / maxRevenue) * maxBarLength);
+
+            // Print the day, the bar, and the revenue
+            std::cout << "Day " << std::setw(2) << day << ": "
+                << std::string(barLength, '*') << " "
+                << std::fixed << std::setprecision(2) << revenue << "\n";
+        }
+
+        // Free the result set
+        mysql_free_result(result);
+
+        // Ask if the user wants to continue
+        char choose;
+        std::cout << "\n\n" << std::setw(70) << "Continue? (y/n): ";
+        std::cin >> choose;
+
+        if (choose == 'y' || choose == 'Y') {
+            Report();
+        }
+        else {
+            AdminMenu();
+        }
     }
     else if (choose == 2) {
         system("cls");
-        std::string filePath = "admin.txt"; // Path to the admin file
         welcomeHeader(filePath);
+
         std::string startDate, endDate;
         std::cout << "\n\n" << std::setw(71) << "Enter start date (YYYY-MM-DD): ";
         std::cin >> startDate;
@@ -4949,8 +5035,7 @@ system("cls");
             cout << endl << setw(70) << "Continue ? (y/n): ";
             cin >> choose;
 
-            if (choose == 'y' || choose == 'Y')
-            {
+            if (choose == 'y' || choose == 'Y') {
                 Report();
             }
             else {
@@ -4958,37 +5043,67 @@ system("cls");
             }
             return;
         }
-        
+
         char choose;
         std::cout << "\n";
         cout << endl << setw(70) << "Continue ? (y/n): ";
         cin >> choose;
 
-        if (choose == 'y' || choose == 'Y')
-        {
+        if (choose == 'y' || choose == 'Y') {
             Report();
         }
-        else
-        {
-
+        else {
             AdminMenu();
         }
 
-
     }
     else if (choose == 3) {
+        system("cls");
+        welcomeHeader(filePath);
+
+        std::cout << "\n\n" << std::setw(71) << "Enter year (YYYY): ";
+        std::string year;
+
+        while (true) {
+            std::cin >> year;
+
+            // Check if input is a 4-digit number
+            if (year.size() == 4 && std::all_of(year.begin(), year.end(), ::isdigit)) {
+                break; // Valid input
+            }
+            else {
+                std::cout << "\n" << std::setw(71) << "Invalid input. Please enter a valid year (YYYY): ";
+            }
+        }
+
+        if (!generateMonthlyReport(conn, year)) {
+            std::cerr << "Error generating monthly report\n";
+            mysql_close(conn);
+            return;
+        }
+
+        char choose;
+        std::cout << "\n\n" << std::setw(70) << "Continue? (y/n): ";
+        std::cin >> choose;
+
+        if (choose == 'y' || choose == 'Y') {
+            Report();
+        }
+        else {
+            AdminMenu();
+        }
+}
+
+    else if (choose == 4) {
         char choose;
         std::cout << "\n                                         Do you want to go back to Main Menu? (yes/no): ";
         cin >> choose;
 
-        if (choose == 'y' || choose == 'Y')
-        {
+        if (choose == 'y' || choose == 'Y') {
             AdminMenu();
         }
-        else
-        {
-
+        else {
             Report();
         }
-    }  
+    }
 }
