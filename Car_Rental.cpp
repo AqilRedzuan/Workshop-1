@@ -4690,7 +4690,7 @@ void RentalInCustomer() {
     cout << setw(64) << "Logged In As: " << CustName;
 
     // Display message showing IC
-    cout << "\n\n" << setw(64) << "Your IC: " << user;
+    cout << "\n\n" << setw(59) << "Your IC: " << user;
 
     // Check if the user has any active rentals that are not returned
     std::string checkRentalQuery = "SELECT Rent_Status FROM rent WHERE CustID = '" + CustID + "' AND Rent_Status != 'returned' LIMIT 1";
@@ -4703,30 +4703,79 @@ void RentalInCustomer() {
     MYSQL_RES* res = mysql_store_result(conn);
     MYSQL_ROW row = mysql_fetch_row(res);  // Declare row once here
     if (row) {
-        cout << "\n";
-        std::cerr << "You have an active rental that has not been returned yet. Please go to the counter for return process.\n";
+        cout << "\n\n";
+        cout << setw(110) << "You have an active rental that has not been returned yet. Please go to the counter for return process.\n";
         mysql_free_result(res);
         cout << "\n";
-        cout << setw(85) << "Continue ? (y/n): ";
-        char option;
+
+        cout << setw(68) << "Choose an option:\n";
+        cout << "\n";
+        cout << setw(68) << "1. Go back to main menu.\n";
+        cout << "\n";
+        cout << setw(68) << "2. Logout.\n";
+        cout << "\n";
+        cout << setw(68) << "Your choice (1,2,3): ";
+        int option;
         cin >> option;
 
-        if (option == 'y' || option == 'Y')
-        {
-            RentalInAdmin(); //in admin
-        }
-        else
-        {
+        switch (option) {
+        case 1:
+            // Go back to main menu (assuming CustPage is the main menu)
+            CustPage();  // Assuming this is the main menu
+            break;
 
-            RentalMenu();
+        case 2:
+            cout << "\n";
+            cout << setw(81) << "Do you want to exit the program? (yes/no) : ";
+            std::cin >> answer;
+
+            for (char& c : answer) {
+                c = std::tolower(c);
+            }
+
+            system("cls");
+
+            if (answer == "yes" || answer == "y") {
+                ifstream inputFile("thank.txt"); //displaying thank you ASCII image text on output screen fn1353
+                if (!inputFile) {
+                    cout << "Cannot open input file.\n";
+                }
+                char str[1000];
+                while (inputFile) {
+                    inputFile.getline(str, 1000);
+                    if (inputFile)
+                        cout << str << endl;
+                }
+                inputFile.close();
+                std::cout << "\n Logged out successfully\n" << std::endl;
+                std::cin.get();
+                exit(0); // Terminate the program with exit code 0 (indicating a successful exi
+            }
+            else {
+                main();
+            }
+        default:
+            cout << "\n";
+            char choice;
+            cout << setw(85) << "Invalid Input. Would you like to try again? (y/n): ";
+            std::cin >> choice;
+            if (choice == 'Y' || choice == 'y') {
+                RentalInCustomer();
+            }
+            else {
+                CustPage();
+            }
+            break;
         }
+
         return;
+
     }
     mysql_free_result(res);
 
     // Continue with the rest of the logic if no active rentals found
     cout << "\n\n";
-    cout << setw(64) << "No active rental found. You can proceed with your new rental.\n";
+    cout << setw(90) << "No active rental found. You can proceed with your new rental.\n";
 
     // Rental date inputs and further processing
     std::cout << "\n\n" << std::setw(75) << "Enter Rental Date (YYYY-MM-DD): ";
