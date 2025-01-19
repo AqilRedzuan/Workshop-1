@@ -800,13 +800,25 @@ void DeleteStaff() {
         res = mysql_store_result(conn);
         if (!qstate && (row = mysql_fetch_row(res))) {
             mysql_free_result(res);
-            string query = "DELETE FROM staff WHERE employee_id='" + id + "'";
-            qstate = mysql_query(conn, query.c_str());
-            if (!qstate) {
-                cout << endl << setw(77) << "Successfully deleted from staff record" << endl;
+
+            char confirm;
+            cout << endl << setw(88) << "Are you sure you want to delete this staff member? (y/n): ";
+            cin >> confirm;
+
+            if (confirm == 'y' || confirm == 'Y') {
+                string query = "DELETE FROM staff WHERE employee_id='" + id + "'";
+                qstate = mysql_query(conn, query.c_str());
+                if (!qstate) {
+                    cout << endl << setw(77) << "Successfully deleted from staff record" << endl;
+                }
+                else {
+                    cout << "Failed to Delete: " << mysql_error(conn) << endl;
+                }
             }
             else {
-                cout << "Failed to Delete: " << mysql_error(conn) << endl;
+                cout << endl << setw(77) << "Deletion canceled. Returning to delete menu." << endl;
+                StaffMenu(); // Go back to the delete menu
+                return;
             }
         }
         else {
@@ -833,6 +845,7 @@ void DeleteStaff() {
         }
     }
 }
+
 
 void ListStaff() {
     system("cls");
@@ -1354,7 +1367,8 @@ void DeleteCat() {
             if (!qstate && (row = mysql_fetch_row(res)) && atoi(row[0]) > 0)
             {
                 cout << endl << setw(95) << "Cannot delete. This category is linked to existing cars." << endl;
-                cout << setw(92) << "Do you want to try again? (y/n): ";
+                cout << "\n";
+                cout << setw(77) << "Do you want to try again? (y/n): ";
                 cin >> choose;
                 if (choose == 'y' || choose == 'Y')
                 {
@@ -1367,18 +1381,32 @@ void DeleteCat() {
             }
             else
             {
-                // Proceed to delete the CatID
-                string deleteQuery = "delete from carcat where CatID='" + id + "'";
-                const char* deleteQd = deleteQuery.c_str();
-                qstate = mysql_query(conn, deleteQd);
+                // Ask for confirmation before deletion
+                char confirm;
+                cout << endl << setw(88) << "Are you sure you want to delete this category? (y/n): ";
+                cin >> confirm;
 
-                if (!qstate)
+                if (confirm == 'y' || confirm == 'Y')
                 {
-                    cout << endl << setw(80) << "Successfully deleted from category record" << endl;
+                    // Proceed to delete the CatID
+                    string deleteQuery = "delete from carcat where CatID='" + id + "'";
+                    const char* deleteQd = deleteQuery.c_str();
+                    qstate = mysql_query(conn, deleteQd);
+
+                    if (!qstate)
+                    {
+                        cout << endl << setw(80) << "Successfully deleted from category record" << endl;
+                    }
+                    else
+                    {
+                        cout << "Failed to Delete: " << mysql_error(conn) << endl;
+                    }
                 }
                 else
                 {
-                    cout << "Failed to Delete: " << mysql_error(conn) << endl;
+                    cout << endl << setw(77) << "Deletion canceled. Returning to delete menu." << endl;
+                    DeleteCat();
+                    return;
                 }
             }
         }
@@ -1807,8 +1835,7 @@ void DeleteCar() {
     string id;
 
     qstate = mysql_query(conn, "SELECT car.*, carcat.CarBrand, carcat.Model FROM car JOIN carcat ON car.CatID = carcat.CatID");
-    if (!qstate)
-    {
+    if (!qstate) {
 
         res = mysql_store_result(conn);
 
@@ -1825,7 +1852,6 @@ void DeleteCar() {
             cout << setw(106) << "-------------------------------------------------------------------------------------------\n";
         }
 
-
         cout << endl << endl << setw(70) << "Enter ID to delete: ";
         cin >> id;
 
@@ -1836,59 +1862,81 @@ void DeleteCar() {
         qstate = mysql_query(conn, qd);
         res = mysql_store_result(conn);
 
-        if (!qstate)
-        {
-            while ((row = mysql_fetch_row(res)))
-            {
-                if (row[0] == id)
-                {
+        if (!qstate) {
+            while ((row = mysql_fetch_row(res))) {
+                if (row[0] == id) {
                     found = true;
                     break;
                 }
             }
         }
 
-        if (found)
-        {
-            string query = "delete from car where CarID='" + id + "'";
-            const char* qd = query.c_str();
-            qstate = mysql_query(conn, qd);
-            if (!qstate)
-            {
-                cout << endl << setw(79) << "Successfully deleted from car record" << endl;
+        if (found) {
+            // Check if the car is linked to any rent
+            string rentCheckQuery = "SELECT COUNT(*) FROM rent WHERE CarID='" + id + "'";
+            const char* rentCheckQd = rentCheckQuery.c_str();
+            qstate = mysql_query(conn, rentCheckQd);
+
+            if (!qstate) {
+                res = mysql_store_result(conn);
+                row = mysql_fetch_row(res);
+
+                if (stoi(row[0]) > 0) { // Car is linked with a rent
+                    cout << endl << setw(90) << "This car is linked with a rent and cannot be deleted." << endl;
+                }
+                else { // Car is not linked with any rent
+                    // Confirmation prompt
+                    char confirm;
+                    cout << endl << setw(85) << "Are you sure you want to delete this car? (y/n): ";
+                    cin >> confirm;
+
+                    if (confirm == 'y' || confirm == 'Y') {
+                        string deleteQuery = "delete from car where CarID='" + id + "'";
+                        const char* deleteQd = deleteQuery.c_str();
+                        qstate = mysql_query(conn, deleteQd);
+
+                        if (!qstate) {
+                            cout << endl << setw(79) << "Successfully deleted from car record" << endl;
+                        }
+                        else {
+                            cout << "Failed to Delete: " << mysql_error(conn) << endl;
+                        }
+                    }
+                    else {
+                        cout << endl << setw(77) << "Deletion canceled. Returning to delete menu." << endl;
+                        CarMenu(); // Return to delete menu
+                        return;
+                    }
+                }
             }
-            else
-            {
-                cout << "Failed to Delete" << mysql_error(conn) << endl;
+            else {
+                cout << "Failed to check rent status: " << mysql_error(conn) << endl;
             }
         }
-
-        else
-        {
-            cout << endl << setw(90) << "Please Enter a valid ID.Do You Want To Try Again? (y/n): ";
+        else {
+            cout << endl << setw(90) << "Please Enter a valid ID. Do You Want To Try Again? (y/n): ";
             cin >> choose;
-            if (choose == 'y' || choose == 'Y')
-            {
+            if (choose == 'y' || choose == 'Y') {
                 DeleteCar();
             }
-            else if (choose == 'n' || choose == 'N')
-            {
+            else if (choose == 'n' || choose == 'N') {
                 CarMenu();
             }
         }
-        cout << endl << setw(85) << "Do you want to Delete another Car? (y/n): ";
+
+        cout << endl << setw(85) << "Do you want to delete another car? (y/n): ";
         cin >> choose;
 
-        if (choose == 'y' || choose == 'Y')
-        {
+        if (choose == 'y' || choose == 'Y') {
             DeleteCar();
         }
-        else
-        {
+        else {
             ListCar();
         }
     }
 }
+
+
 
 //List Car
 void ListCar() {
@@ -2288,28 +2336,27 @@ void DeleteCust() {
     welcomeHeader(filePath);
 
     char choose;
-    string id;
+    string IC; // Declare IC here
 
     qstate = mysql_query(conn, "select * from customer");
-    if (!qstate)
-    {
+    if (!qstate) {
 
         res = mysql_store_result(conn);
 
         cout << "\n";
         cout << setw(109) << "-----------------------------------------------------------------------------------------------\n";
-        //data show in box
+        // Data displayed in a box
         cout << setw(13) << "";
         printf("| %-16s | %-15s | %-8s | %-15s | %-25s | \n", "IC", "Name", "License", "No. Phone", "Email");
         cout << setw(109) << "-----------------------------------------------------------------------------------------------\n";
 
-        while ((row = mysql_fetch_row(res)))
-        {
+        while ((row = mysql_fetch_row(res))) {
             cout << setw(13) << "";
             printf("| %-16s | %-15s | %-8s | %-15s | %-25s | \n", row[2], row[1], row[4], row[5], row[6]);
             cout << setw(109) << "-----------------------------------------------------------------------------------------------\n";
         }
-        cout << endl << endl << setw(65) << "  Choose Customer IC : ";
+
+        cout << endl << endl << setw(65) << "  Choose Customer IC: ";
         cin >> IC;
 
         bool found = false;
@@ -2319,60 +2366,62 @@ void DeleteCust() {
         qstate = mysql_query(conn, qd);
         res = mysql_store_result(conn);
 
-        if (!qstate)
-        {
-            while ((row = mysql_fetch_row(res)))
-            {
-                if (row[0] == IC)
-                {
+        if (!qstate) {
+            while ((row = mysql_fetch_row(res))) {
+                if (row[0] == IC) {
                     found = true;
                     break;
                 }
             }
         }
 
-        if (found)
-        {
-            string query = "delete from customer where IC='" + IC + "'";
-            const char* qd = query.c_str();
-            qstate = mysql_query(conn, qd);
-            if (!qstate)
-            {
-                cout << endl << setw(80) << "  Successfully deleted from customer record" << endl;
+        if (found) {
+            // Confirmation prompt
+            char confirm;
+            cout << endl << setw(88) << "Are you sure you want to delete this customer? (y/n): ";
+            cin >> confirm;
+
+            if (confirm == 'y' || confirm == 'Y') {
+                string deleteQuery = "delete from customer where IC='" + IC + "'";
+                const char* deleteQd = deleteQuery.c_str();
+                qstate = mysql_query(conn, deleteQd);
+
+                if (!qstate) {
+                    cout << endl << setw(80) << "  Successfully deleted from customer record" << endl;
+                }
+                else {
+                    cout << "Failed to Delete: " << mysql_error(conn) << endl;
+                }
             }
-            else
-            {
-                cout << "Failed to Delete" << mysql_error(conn) << endl;
+            else {
+                cout << endl << setw(77) << "Deletion canceled. Returning to delete menu." << endl;
+                CustomerMenu(); // Return to the delete menu
+                return;
             }
         }
-
-        else
-        {
-            cout << endl << setw(87) << "  Please Enter a valid ID.Do You Want To Try Again? (y/n): ";
+        else {
+            cout << endl << setw(87) << "  Please Enter a valid ID. Do You Want To Try Again? (y/n): ";
             cin >> choose;
-            if (choose == 'y' || choose == 'Y')
-            {
+            if (choose == 'y' || choose == 'Y') {
                 DeleteCust();
             }
-            else if (choose == 'n' || choose == 'N')
-            {
+            else if (choose == 'n' || choose == 'N') {
                 CustomerMenu();
             }
         }
-        cout << endl << setw(84) << "  Do you want to delete another student? (y/n): ";
+
+        cout << endl << setw(84) << "  Do you want to delete another customer? (y/n): ";
         cin >> choose;
 
-        if (choose == 'y' || choose == 'Y')
-        {
+        if (choose == 'y' || choose == 'Y') {
             DeleteCust();
         }
-        else
-        {
+        else {
             ListCust();
         }
     }
-
 }
+
 
 void ListCust() {
     system("cls");
@@ -3001,7 +3050,7 @@ void DeleteRental() {
     std::string filePath = "rent.txt"; // Path to the admin file
     welcomeHeader(filePath);
 
-    char choose;
+    char choose, confirm;
     string ID;
 
     qstate = mysql_query(conn, "SELECT * FROM rent");
@@ -3024,7 +3073,7 @@ void DeleteRental() {
             cout << setw(111) << "------------------------------------------------------------------------------------------------------\n";
         }
 
-        cout << endl << endl << setw(72) << "  Choose Rental ID : ";
+        cout << endl << endl << setw(72) << "  Choose Rental ID: ";
         cin >> ID;
 
         bool found = false;
@@ -3044,24 +3093,35 @@ void DeleteRental() {
         }
 
         if (found) {
-            // Archive the data first
-            string archiveQuery = "INSERT INTO rent_archive SELECT * FROM rent WHERE RentID='" + ID + "'";
-            qstate = mysql_query(conn, archiveQuery.c_str());
-            if (!qstate) {
-                cout << endl << setw(80) << "Successfully archived the Rent record" << endl;
+            // Ask for confirmation before proceeding with deletion
+            cout << endl << setw(85) << "Are you sure you want to delete this Rental record? (y/n): ";
+            cin >> confirm;
 
-                // Then delete the data
-                string deleteQuery = "DELETE FROM rent WHERE RentID='" + ID + "'";
-                qstate = mysql_query(conn, deleteQuery.c_str());
+            if (confirm == 'y' || confirm == 'Y') {
+                // Archive the data first
+                string archiveQuery = "INSERT INTO rent_archive SELECT * FROM rent WHERE RentID='" + ID + "'";
+                qstate = mysql_query(conn, archiveQuery.c_str());
                 if (!qstate) {
-                    cout << endl << setw(80) << "Successfully deleted from Rent record" << endl;
+                    cout << endl << setw(80) << "Successfully archived the Rent record" << endl;
+
+                    // Then delete the data
+                    string deleteQuery = "DELETE FROM rent WHERE RentID='" + ID + "'";
+                    qstate = mysql_query(conn, deleteQuery.c_str());
+                    if (!qstate) {
+                        cout << endl << setw(80) << "Successfully deleted from Rent record" << endl;
+                    }
+                    else {
+                        cout << "Failed to delete: " << mysql_error(conn) << endl;
+                    }
                 }
                 else {
-                    cout << "Failed to delete: " << mysql_error(conn) << endl;
+                    cout << "Failed to archive: " << mysql_error(conn) << endl;
                 }
             }
             else {
-                cout << "Failed to archive: " << mysql_error(conn) << endl;
+                cout << endl << setw(77) << "Deletion canceled. Returning to delete menu." << endl;
+                RentalMenu(); // Return to delete menu
+                return;
             }
         }
         else {
@@ -3087,13 +3147,14 @@ void DeleteRental() {
     }
 }
 
+
 void ArchieveData() {
     system("cls");
     std::string filePath = "admin.txt"; // Path to the admin file
     welcomeHeader(filePath);
+
     qstate = mysql_query(conn, "SELECT * FROM rent_archive");
-    if (!qstate)
-    {
+    if (!qstate) {
         res = mysql_store_result(conn);
 
         cout << "\n\n";
@@ -3107,12 +3168,54 @@ void ArchieveData() {
             cout << setw(8) << "" << "-----------------------------------------------------------------------------------------------------\n";
         }
 
+        cout << "\n" << setw(50) << "" << "1. Restore Data\n";
+        cout << "\n";
+        cout << setw(50) << "" << "2. Go Back to Main Menu\n";
+        cout << "\n";
+        cout << setw(50) << "" << "Enter your choice: ";
+
+        int choice;
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            cout << "\n" << setw(50) << "" << "Enter Rent ID to restore: ";
+            {
+                string rentID;
+                cin >> rentID;
+                std::string query = "INSERT INTO rent SELECT * FROM rent_archive WHERE RentID = '" + rentID + "';";
+                qstate = mysql_query(conn, query.c_str());
+                if (!qstate) {
+                    std::string deleteQuery = "DELETE FROM rent_archive WHERE RentID = '" + rentID + "';";
+                    qstate = mysql_query(conn, deleteQuery.c_str());
+                    if (!qstate) {
+                        cout << "\n" << setw(50) << "" << "Data successfully restored.\n";
+                    }
+                    else {
+                        cout << "\n" << setw(50) << "" << "Failed to delete data from archive: " << mysql_error(conn) << "\n";
+                    }
+                }
+                else {
+                    cout << "\n" << setw(50) << "" << "Failed to restore data: " << mysql_error(conn) << "\n";
+                }
+            }
+            break;
+
+        case 2:
+            RentalMenu();
+            return;
+
+        default:
+            cout << "\n" << setw(50) << "" << "Invalid choice! Press Enter to continue...";
+            _getch();
+            ArchieveData();
+        }
 
     }
-    else
-    {
+    else {
         cout << "Query Execution Problem!" << mysql_error(conn) << endl;
     }
+
     cout << "\n" << setw(70) << "Press Enter To Back....";
     _getch();
     RentalMenu();
@@ -3749,96 +3852,97 @@ void CustUpdate() {
 }
 
 void CustDelete() {
-
     system("cls");
     std::string filePath = "staff.txt"; // Path to the admin file
     welcomeHeader(filePath);
 
-    char choose;
-    string id;
+    char choose, confirm;
+    string IC;
 
-    qstate = mysql_query(conn, "select * from customer");
-    if (!qstate)
-    {
-
+    qstate = mysql_query(conn, "SELECT * FROM customer");
+    if (!qstate) {
         res = mysql_store_result(conn);
 
         cout << "\n";
         cout << setw(105) << "-------------------------------------------------------------------------------------------\n";
-        //data show in box
+        // Data show in box
         cout << setw(13) << "";
         printf("|%-3s | %-12s | %-15s | %-10s | %-13s | %-20s |\n", "ID", "Name", "IC", "License", "No.Phone", "Email");
         cout << setw(105) << "-------------------------------------------------------------------------------------------\n";
 
-        while ((row = mysql_fetch_row(res)))
-        {
+        while ((row = mysql_fetch_row(res))) {
             cout << setw(13) << "";
             printf("|%-3s | %-12s | %-15s | %-10s | %-13s | %-20s |\n", row[0], row[1], row[2], row[4], row[5], row[6]);
             cout << setw(105) << "-------------------------------------------------------------------------------------------\n";
         }
-        cout << endl << endl << setw(66) << "  Choose Customer IC : ";
+
+        cout << endl << endl << setw(66) << "  Enter Customer IC to delete: ";
         cin >> IC;
 
         bool found = false;
 
-        string query = "select IC from customer";
+        string query = "SELECT IC FROM customer";
         const char* qd = query.c_str();
         qstate = mysql_query(conn, qd);
         res = mysql_store_result(conn);
 
-        if (!qstate)
-        {
-            while ((row = mysql_fetch_row(res)))
-            {
-                if (row[0] == IC)
-                {
+        if (!qstate) {
+            while ((row = mysql_fetch_row(res))) {
+                if (row[0] == IC) {
                     found = true;
                     break;
                 }
             }
         }
 
-        if (found)
-        {
-            string query = "delete from customer where IC='" + IC + "'";
-            const char* qd = query.c_str();
-            qstate = mysql_query(conn, qd);
-            if (!qstate)
-            {
-                cout << endl << setw(35) << "         Successfully deleted from customer record" << endl;
+        if (found) {
+            // Ask for confirmation before deletion
+            cout << endl << setw(84) << "Are you sure you want to delete this record? (y/n): ";
+            cin >> confirm;
+
+            if (confirm == 'y' || confirm == 'Y') {
+                string deleteQuery = "DELETE FROM customer WHERE IC='" + IC + "'";
+                const char* deleteQd = deleteQuery.c_str();
+                qstate = mysql_query(conn, deleteQd);
+                if (!qstate) {
+                    cout << endl << setw(60) << "Successfully deleted from customer record." << endl;
+                }
+                else {
+                    cout << "Failed to delete: " << mysql_error(conn) << endl;
+                }
             }
-            else
-            {
-                cout << "Failed to Delete" << mysql_error(conn) << endl;
+            else {
+                cout << endl << setw(50) << "Deletion canceled. Returning to menu." << endl;
+                DeleteCust(); // Restart the delete process
+                return;
             }
         }
-
-        else
-        {
-            cout << endl << setw(84) << "Please Enter a valid ID. Do You Want To Try Again? (y/n): ";
+        else {
+            cout << endl << setw(80) << "Invalid IC. Do you want to try again? (y/n): ";
             cin >> choose;
-            if (choose == 'y' || choose == 'Y')
-            {
+            if (choose == 'y' || choose == 'Y') {
                 CustDelete();
             }
-            else if (choose == 'n' || choose == 'N')
-            {
+            else if (choose == 'n' || choose == 'N') {
                 StaffPage();
             }
         }
-        cout << endl << setw(35) << "         Do you want to delete another student?(y|n): ";
+
+        cout << endl << setw(75) << "Do you want to delete another customer? (y/n): ";
         cin >> choose;
 
-        if (choose == 'y' || choose == 'Y')
-        {
+        if (choose == 'y' || choose == 'Y') {
             CustDelete();
         }
-        else
-        {
+        else {
             CustList();
         }
     }
+    else {
+        cout << "Error in retrieving customer data: " << mysql_error(conn) << endl;
+    }
 }
+
 
 void CustSearch() {
 
@@ -4152,27 +4256,25 @@ void CarDelete() {
     char choose;
     string id;
 
-    qstate = mysql_query(conn, "select * from car");
-    if (!qstate)
-    {
+    qstate = mysql_query(conn, "SELECT car.*, carcat.CarBrand, carcat.Model FROM car JOIN carcat ON car.CatID = carcat.CatID");
+    if (!qstate) {
 
         res = mysql_store_result(conn);
 
         cout << "\n";
-        cout << setw(30) << ""; cout << "-------------------------------------------------------\n";
-        //data show in box
-        cout << setw(30) << "";
-        printf("| %-3s | %-13s | %-15s | %-11s | \n", "ID", "Plate", "Price", "Status");
-        cout << setw(30) << ""; cout << "-------------------------------------------------------\n";
+        cout << setw(106) << "===========================================================================================\n";
+        // Display headers with better alignment and spacing
+        cout << setw(14) << "";
+        printf("| %-5s | %-12s | %-12s | %-13s | %-8s | %-10s | %-9s |\n", "ID", "Car Brand", "Model", "Plate", "Price", "Status", "Cat ID");
+        cout << setw(106) << "-------------------------------------------------------------------------------------------\n";
 
-        while ((row = mysql_fetch_row(res)))
-        {
-            cout << setw(30) << "";
-            printf("| %-3s | %-13s | %-15s | %-11s | \n", row[0], row[1], row[2], row[3]);
-            cout << setw(30) << ""; cout << "-------------------------------------------------------\n";
+        while ((row = mysql_fetch_row(res))) {
+            cout << setw(14) << "";
+            printf("| %-5s | %-12s | %-12s | %-13s | %-8s | %-10s | %-9s |\n", row[0], row[5], row[6], row[1], row[2], row[3], row[4]);
+            cout << setw(106) << "-------------------------------------------------------------------------------------------\n";
         }
 
-        cout << endl << endl << setw(68) << "Enter ID to delete: ";
+        cout << endl << endl << setw(70) << "Enter ID to delete: ";
         cin >> id;
 
         bool found = false;
@@ -4182,55 +4284,75 @@ void CarDelete() {
         qstate = mysql_query(conn, qd);
         res = mysql_store_result(conn);
 
-        if (!qstate)
-        {
-            while ((row = mysql_fetch_row(res)))
-            {
-                if (row[0] == id)
-                {
+        if (!qstate) {
+            while ((row = mysql_fetch_row(res))) {
+                if (row[0] == id) {
                     found = true;
                     break;
                 }
             }
         }
 
-        if (found)
-        {
-            string query = "delete from car where CarID='" + id + "'";
-            const char* qd = query.c_str();
-            qstate = mysql_query(conn, qd);
-            if (!qstate)
-            {
-                cout << endl << setw(75) << "Successfully deleted from car record" << endl;
+        if (found) {
+            // Check if the car is linked to any rent
+            string rentCheckQuery = "SELECT COUNT(*) FROM rent WHERE CarID='" + id + "'";
+            const char* rentCheckQd = rentCheckQuery.c_str();
+            qstate = mysql_query(conn, rentCheckQd);
+
+            if (!qstate) {
+                res = mysql_store_result(conn);
+                row = mysql_fetch_row(res);
+
+                if (stoi(row[0]) > 0) { // Car is linked with a rent
+                    cout << endl << setw(90) << "This car is linked with a rent and cannot be deleted." << endl;
+                }
+                else { // Car is not linked with any rent
+                    // Confirmation prompt
+                    char confirm;
+                    cout << endl << setw(85) << "Are you sure you want to delete this car? (y/n): ";
+                    cin >> confirm;
+
+                    if (confirm == 'y' || confirm == 'Y') {
+                        string deleteQuery = "delete from car where CarID='" + id + "'";
+                        const char* deleteQd = deleteQuery.c_str();
+                        qstate = mysql_query(conn, deleteQd);
+
+                        if (!qstate) {
+                            cout << endl << setw(79) << "Successfully deleted from car record" << endl;
+                        }
+                        else {
+                            cout << "Failed to Delete: " << mysql_error(conn) << endl;
+                        }
+                    }
+                    else {
+                        cout << endl << setw(77) << "Deletion canceled. Returning to delete menu." << endl;
+                        MenuCar(); // Return to delete menu
+                        return;
+                    }
+                }
             }
-            else
-            {
-                cout << "Failed to Delete" << mysql_error(conn) << endl;
+            else {
+                cout << "Failed to check rent status: " << mysql_error(conn) << endl;
             }
         }
-
-        else
-        {
-            cout << endl << setw(83) << "Please Enter a valid ID. Do You Want To Try Again? (y/n): ";
+        else {
+            cout << endl << setw(90) << "Please Enter a valid ID. Do You Want To Try Again? (y/n): ";
             cin >> choose;
-            if (choose == 'y' || choose == 'Y')
-            {
+            if (choose == 'y' || choose == 'Y') {
                 CarDelete();
             }
-            else if (choose == 'n' || choose == 'N')
-            {
+            else if (choose == 'n' || choose == 'N') {
                 MenuCar();
             }
         }
-        cout << endl << setw(78) << "Do you want to Delete another Car? (y/n): ";
+
+        cout << endl << setw(85) << "Do you want to delete another car? (y/n): ";
         cin >> choose;
 
-        if (choose == 'y' || choose == 'Y')
-        {
+        if (choose == 'y' || choose == 'Y') {
             CarDelete();
         }
-        else
-        {
+        else {
             CarList();
         }
     }
