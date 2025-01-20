@@ -2535,7 +2535,7 @@ void RentalMenu() {
     cout << setw(66) << "1. Rent Car\n\n";
     cout << setw(69) << "2. Update Rent\n\n";
     cout << setw(69) << "3. Delete Rent\n\n";
-    cout << setw(68) << "4. Return Car\n\n";
+    cout << setw(69) << "4. Return List\n\n";
     cout << setw(69) << "5. Rented List\n\n";
     cout << setw(64) << "6. Search\n\n";
     cout << setw(66) << "7. Archieve\n\n";
@@ -2945,26 +2945,33 @@ void RentalInAdmin() {
 }
 
 void UpdateRentalA() {
-    db_response::ConnectionFunction();
+    db_response::ConnectionFunction();  // Connect to the database
     system("cls");
-    std::string filePath = "rent.txt"; // Path to the admin file
+    std::string filePath = "rent.txt";  // Path to the admin file
     welcomeHeader(filePath);
 
-    string rentID, rentStatus;
+    std::string rentID, rentStatus;
 
     // Display the table with RentID, Customer IC, Car Plate, and Rent Status
-    qstate = mysql_query(conn, "SELECT rent.RentID, customer.IC, car.Plate, rent.Rent_Status FROM rent "
+    qstate = mysql_query(conn,
+        "SELECT rent.RentID, customer.IC, car.Plate, rent.Rent_Status "
+        "FROM rent "
         "JOIN customer ON rent.CustID = customer.CustID "
         "JOIN car ON rent.CarID = car.CarID");
 
+    if (qstate != 0) {
+        std::cerr << "Error fetching rentals: " << mysql_error(conn) << std::endl;
+        return;
+    }
+
     std::cout << "\n\n";
-    table();  // Assuming this is the function that initializes the table display
+    table();  // Assuming this initializes and displays the table
     std::cout << "\n\n" << std::setw(75) << "Enter Rental ID to update: ";
     std::cin >> rentID;
 
     // Validate that the rental ID exists
     bool validRental = false;
-    string query = "SELECT 1 FROM rent WHERE RentID = '" + rentID + "'";
+    std::string query = "SELECT 1 FROM rent WHERE RentID = '" + rentID + "'";
 
     if (mysql_query(conn, query.c_str()) != 0) {
         std::cerr << "Error executing query: " << mysql_error(conn) << std::endl;
@@ -2987,9 +2994,7 @@ void UpdateRentalA() {
         std::cout << "\n";
         std::cout << std::setw(69) << "2. Returned\n";
         std::cout << "\n";
-        std::cout << std::setw(68) << "3. Pending\n";
-        std::cout << "\n\n";
-        std::cout << std::setw(73) << "Enter your choice (1-3): ";
+        std::cout << std::setw(73) << "Enter your choice (1-2): ";
 
         int choice;
         std::cin >> choice;
@@ -3002,12 +3007,20 @@ void UpdateRentalA() {
         case 2:
             rentStatus = "Returned";
             break;
-        case 3:
-            rentStatus = "Pending";
-            break;
         default:
-            std::cerr << "Invalid choice, please enter a number between 1 and 3." << std::endl;
-            UpdateRentalA();
+            cout << "\n";
+            cout << setw(86) << "Invalid choice, please enter a number between 1 and 2." << std::endl;
+            char retryChoice;
+            cout << "\n";
+            cout << setw(78) << "Do you want to retry? (y/n): ";
+            std::cin >> retryChoice;
+
+            if (retryChoice == 'y' || retryChoice == 'Y') {
+                UpdateRentalA();  // Go back to update rental
+            }
+            else {
+                RentalMenu();  
+            }
             return;
         }
 
@@ -3020,6 +3033,55 @@ void UpdateRentalA() {
         else {
             std::cout << "\n";
             std::cout << std::setw(73) << "Rental status updated successfully to: " << rentStatus << std::endl;
+
+            // Fetch the CarID associated with the RentID
+            query = "SELECT CarID, Return_Date FROM rent WHERE RentID = '" + rentID + "'";
+            if (mysql_query(conn, query.c_str()) != 0) {
+                std::cerr << "Error fetching CarID and Return_Date: " << mysql_error(conn) << std::endl;
+            }
+            else {
+                MYSQL_RES* carRes = mysql_store_result(conn);
+                MYSQL_ROW carRow = mysql_fetch_row(carRes);
+                if (carRow) {
+                    std::string carID = carRow[0];
+                    std::string returnDate = carRow[1];  // Assuming Return_Date is stored as a string
+                    mysql_free_result(carRes);
+
+                    // Update the car's status based on the new Rent_Status
+                    std::string carStatus;
+                    if (rentStatus == "Approved") {
+                        carStatus = "Rented";
+                    }
+                    else if (rentStatus == "Returned") {
+                        carStatus = "Available";
+
+                        // Insert into car_return table
+                        std::string returnQuery =
+                            "INSERT INTO car_return (RentID, ReturnDate) "
+                            "VALUES ('" + rentID + "', '" + returnDate + "')";
+                        if (mysql_query(conn, returnQuery.c_str()) != 0) {
+                            std::cerr << "Error inserting into car_return: " << mysql_error(conn) << std::endl;
+                        }
+                        else {
+                            cout << "\n";
+                            std::cout << std::setw(88) << "Car return data successfully inserted into car_return table." << std::endl;
+                        }
+                    }
+
+                    // Update the car table with the new status
+                    query = "UPDATE car SET Status = '" + carStatus + "' WHERE CarID = '" + carID + "'";
+                    if (mysql_query(conn, query.c_str()) != 0) {
+                        std::cerr << "Error updating car status: " << mysql_error(conn) << std::endl;
+                    }
+                    else {
+                        std::cout << "\n";
+                        std::cout << std::setw(73) << "Car status updated successfully to: " << carStatus << std::endl;
+                    }
+                }
+                else {
+                    std::cerr << "CarID not found for the given RentID." << std::endl;
+                }
+            }
         }
 
         // Ask if the admin wants to return to the admin menu
@@ -3028,11 +3090,12 @@ void UpdateRentalA() {
         std::cin >> backChoice;
 
         if (backChoice == 'y' || backChoice == 'Y') {
-            RentList();  // Function that shows the main admin menu
+            RentalMenu();  // Function that shows the main admin menu
         }
         else {
             std::cout << "Thank you for using the admin system. Exiting now..." << std::endl;
-            UpdateRentalA();  // Or use return to exit gracefully
+            UpdateRentalA();
+            return;
         }
     }
     else {
@@ -3222,13 +3285,12 @@ void ArchieveData() {
 }
 
 void ReturnCar() {
-
     system("cls");
-    string ID;
     std::string filePath = "rent.txt"; // Path to the admin file
     welcomeHeader(filePath);
 
-    qstate = mysql_query(conn, "SELECT rent.RentID, car.CarID, rent.CustID, carcat.CarBrand, car.Plate, rent.Rent_Date, rent.Return_Date, rent.Rent_Status FROM carcat JOIN car ON carcat.CatID = car.CatID JOIN rent ON car.CarID = rent.CarID");
+    // Query to fetch cars with status 'Returned'
+    qstate = mysql_query(conn, "SELECT rent.RentID, car.CarID, rent.CustID, carcat.CarBrand, car.Plate, rent.Rent_Date, rent.Return_Date, rent.Rent_Status FROM carcat JOIN car ON carcat.CatID = car.CatID JOIN rent ON car.CarID = rent.CarID WHERE rent.Rent_Status = 'Returned'");
 
     if (!qstate) {
         res = mysql_store_result(conn);
@@ -3246,66 +3308,15 @@ void ReturnCar() {
             cout << setw(111) << "-----------------------------------------------------------------------------------------------------------\n";
         }
 
-        cout << "\n\n" << setw(68) << "Choose Rental ID: ";
-        cin.ignore(1, '\n'); // Discard any leftover newline from previous input
-        getline(cin, ID);
-
-        // Check if the Rental ID exists
-        std::string check_query = "SELECT COUNT(*) FROM rent WHERE RentID = '" + ID + "'";
-        if (mysql_query(conn, check_query.c_str())) {
-            std::cerr << "Error checking rental ID: " << mysql_error(conn) << std::endl;
-            return;
-        }
-
-        res = mysql_store_result(conn);
-        row = mysql_fetch_row(res);
-
-        if (row && atoi(row[0]) == 0) {
-            cout << "\n";
-            cout << setw(82) << "Rental ID not found. Please try again.";
-            cout << "\n\n";
-            cout << setw(84) << "Do you want to return to the menu? (y/n): ";
-            char choice;
-            cin >> choice;
-            if (choice == 'y' || choice == 'Y') {
-                RentalMenu();
-            }
-            else {
-                ReturnCar();
-            }
-            return;
-        }
-
-        // Update rental status to 'returned'
-        std::string update_query = "UPDATE rent SET Rent_Status = 'Returned' WHERE RentID = '" + ID + "' ";
-        if (mysql_query(conn, update_query.c_str())) {
-            std::cerr << "Error updating rental status: " << mysql_error(conn) << std::endl;
-            return;
-        }
-
-        // Log the return date and time
-        std::string log_query = "INSERT INTO car_return (RentID, ReturnDate) VALUES ('" + ID + "', NOW())";
-        if (mysql_query(conn, log_query.c_str())) {
-            std::cerr << "Error logging return date: " << mysql_error(conn) << std::endl;
-            return;
-        }
-
-        std::cout << "\n";
-        cout << setw(83) << "Rental car returned successfully! Update the car status? (y/n): ";
-        char option;
-        cin >> option;
-
-        if (option == 'y' || option == 'Y') {
-            UpdateCar();
-        }
-        else {
-            RentalMenu();
-        }
+        cout << "\n\n" << setw(73) << "Press Enter to return to the menu....";
+        _getch();
+        RentalMenu();
     }
     else {
-        std::cerr << "Error fetching rental data: " << mysql_error(conn) << std::endl;
+        std::cerr << "Error fetching returned car data: " << mysql_error(conn) << std::endl;
     }
 }
+
 
 void RentList() {
 
@@ -4454,114 +4465,155 @@ void CarSearch() {
 
 
 void UpdateRentalS() {
-    db_response::ConnectionFunction();
+    db_response::ConnectionFunction();  // Connect to the database
     system("cls");
-    std::string filePath = "rent.txt"; // Path to the admin file
+    std::string filePath = "rent.txt";  // Path to the admin file
     welcomeHeader(filePath);
 
-    string rentID, rentStatus;
+    std::string rentID, rentStatus;
 
     // Display the table with RentID, Customer IC, Car Plate, and Rent Status
-    qstate = mysql_query(conn, "SELECT rent.RentID, customer.IC, car.Plate, rent.Rent_Status FROM rent "
+    qstate = mysql_query(conn,
+        "SELECT rent.RentID, customer.IC, car.Plate, rent.Rent_Status "
+        "FROM rent "
         "JOIN customer ON rent.CustID = customer.CustID "
         "JOIN car ON rent.CarID = car.CarID");
 
-    cout << "\n\n";
-    table(); // Assuming this is the function that initializes the table display
+    if (qstate != 0) {
+        std::cerr << "Error fetching rentals: " << mysql_error(conn) << std::endl;
+        StaffPage();  // Return to staff menu on error
+        return;
+    }
+
+    std::cout << "\n\n";
+    table();  // Assuming this initializes and displays the table
     std::cout << "\n\n" << std::setw(75) << "Enter Rental ID to update: ";
     std::cin >> rentID;
 
     // Validate that the rental ID exists
-    string query = "SELECT 1 FROM rent WHERE RentID = '" + rentID + "'";
+    bool validRental = false;
+    std::string query = "SELECT 1 FROM rent WHERE RentID = '" + rentID + "'";
+
     if (mysql_query(conn, query.c_str()) != 0) {
         std::cerr << "Error executing query: " << mysql_error(conn) << std::endl;
-        std::cout << "\nDo you want to try again? (y/n): ";
-        char choice;
-        std::cin >> choice;
-        if (choice == 'y' || choice == 'Y') {
-            UpdateRentalS();
-        }
-        else {
-            DisplayRent(); // Return to the main menu
-        }
+        StaffPage();  // Return to staff menu on error
         return;
     }
 
     MYSQL_RES* res = mysql_store_result(conn);
     MYSQL_ROW row = mysql_fetch_row(res);
-    if (row == nullptr) {
-        cout << "\n";
-        cout << setw(72) << "Rental ID not found!" << std::endl;
-        cout << "\n";
-        cout << setw(79) << "Do you want to try again? (y/n): ";
-        char retryChoice;
-        std::cin >> retryChoice;
-        if (retryChoice == 'y' || retryChoice == 'Y') {
-            UpdateRentalS();
-        }
-        else {
-            StaffPage(); // Return to the main menu
-        }
-        return;
+    if (row) {
+        validRental = true;
     }
     mysql_free_result(res);
 
-    // Display options for rent status
-    std::cout << "\n\n" << std::setw(75) << "Choose New Rent Status:\n";
-    cout << "\n";
-    cout << setw(69) << "1. Approved\n";
-    cout << "\n";
-    cout << setw(69) << "2. Returned\n";
-    cout << "\n";
-    cout << setw(68) << "3. Pending\n";
-    cout << "\n";
-    cout << setw(75) << "Enter your choice (1-3): ";
+    if (validRental) {
+        // Display options for rent status
+        std::cout << "\n" << std::setw(72) << "Choose New Rent Status:\n";
+        std::cout << "\n";
+        std::cout << std::setw(69) << "1. Approved\n";
+        std::cout << "\n";
+        std::cout << std::setw(69) << "2. Returned\n";
+        std::cout << "\n";
+        std::cout << std::setw(73) << "Enter your choice (1-2): ";
 
-    int choice;
-    std::cin >> choice;
+        int choice;
+        std::cin >> choice;
 
-    // Map choice to status
-    switch (choice) {
-    case 1: rentStatus = "Approved"; break;
-    case 2: rentStatus = "Returned"; break;
-    case 3: rentStatus = "Pending"; break;
-    default:
-        cout << "\n";
-        cout << setw(86) << "Invalid choice, please enter a number between 1 and 3." << std::endl;
-        char retryChoice;
-        cout << "\n";
-        cout << setw(78) << "Do you want to retry? (y/n): ";
-        std::cin >> retryChoice;
+        // Map choice to status
+        switch (choice) {
+        case 1:
+            rentStatus = "Approved";
+            break;
+        case 2:
+            rentStatus = "Returned";
+            break;
+        default:
+            std::cout << "\n" << std::setw(86) << "Invalid choice, please enter a number between 1 and 2." << std::endl;
+            char retryChoice;
+            std::cout << "\n" << std::setw(78) << "Do you want to retry? (y/n): ";
+            std::cin >> retryChoice;
 
-        if (retryChoice == 'y' || retryChoice == 'Y') {
-            UpdateRentalS();  // Go back to update rental
+            if (retryChoice == 'y' || retryChoice == 'Y') {
+                UpdateRentalS();  // Go back to update rental
+            }
+            else {
+                StaffPage();  // Return to staff page
+            }
+            return;
+        }
+
+        // Update the rent status in the database
+        query = "UPDATE rent SET Rent_Status = '" + rentStatus + "' WHERE RentID = '" + rentID + "'";
+
+        if (mysql_query(conn, query.c_str()) != 0) {
+            std::cerr << "Error updating rent status: " << mysql_error(conn) << std::endl;
         }
         else {
-            StaffPage();  // Go to staff page
+            std::cout << "\n" << std::setw(73) << "Rental status updated successfully to: " << rentStatus << std::endl;
+
+            // Update car status if necessary
+            query = "SELECT CarID, Return_Date FROM rent WHERE RentID = '" + rentID + "'";
+            if (mysql_query(conn, query.c_str()) != 0) {
+                std::cerr << "Error fetching CarID and Return_Date: " << mysql_error(conn) << std::endl;
+            }
+            else {
+                MYSQL_RES* carRes = mysql_store_result(conn);
+                MYSQL_ROW carRow = mysql_fetch_row(carRes);
+                if (carRow) {
+                    std::string carID = carRow[0];
+                    std::string returnDate = carRow[1];  // Assuming Return_Date is stored as a string
+                    mysql_free_result(carRes);
+
+                    std::string carStatus;
+                    if (rentStatus == "Approved") {
+                        carStatus = "Rented";
+                    }
+                    else if (rentStatus == "Returned") {
+                        carStatus = "Available";
+
+                        // Insert into car_return table
+                        std::string returnQuery =
+                            "INSERT INTO car_return (RentID, ReturnDate) "
+                            "VALUES ('" + rentID + "', '" + returnDate + "')";
+                        if (mysql_query(conn, returnQuery.c_str()) != 0) {
+                            std::cerr << "Error inserting into car_return: " << mysql_error(conn) << std::endl;
+                        }
+                        else {
+                            std::cout << "\n" << std::setw(88) << "Car return data successfully inserted into car_return table." << std::endl;
+                        }
+                    }
+
+                    // Update the car table with the new status
+                    query = "UPDATE car SET Status = '" + carStatus + "' WHERE CarID = '" + carID + "'";
+                    if (mysql_query(conn, query.c_str()) != 0) {
+                        std::cerr << "Error updating car status: " << mysql_error(conn) << std::endl;
+                    }
+                    else {
+                        std::cout << "\n" << std::setw(73) << "Car status updated successfully to: " << carStatus << std::endl;
+                    }
+                }
+                else {
+                    std::cerr << "CarID not found for the given RentID." << std::endl;
+                }
+            }
         }
-        return;
-    }
 
-    // Update the rent status in the database
-    query = "UPDATE rent SET Rent_Status = '" + rentStatus + "' WHERE RentID = '" + rentID + "'";
-    if (mysql_query(conn, query.c_str()) != 0) {
-        std::cerr << "Error updating rent status: " << mysql_error(conn) << std::endl;
+        // Ask if the staff wants to return to the main menu
+        char backChoice;
+        std::cout << "\n" << std::setw(84) << "Do you want to go back to the Rental Menu? (y/n): ";
+        std::cin >> backChoice;
+
+        if (backChoice == 'y' || backChoice == 'Y') {
+            DisplayRent();  // Function that shows the main staff menu
+        }
+        else {
+            UpdateRentalS();
+        }
     }
     else {
-        cout << "\n";
-        cout << setw(76) << "Rental status updated successfully to: " << rentStatus << std::endl;
-    }
-
-    // Ask if the admin wants to perform another action
-    cout << "\n";
-    cout << setw(84) << "Do you want to update another rental? (y/n): ";
-    char anotherAction;
-    std::cin >> anotherAction;
-    if (anotherAction == 'y' || anotherAction == 'Y') {
-        UpdateRentalS();
-    }
-    else {
-        DisplayRent(); // Return to the main menu
+        std::cerr << "Rental ID not found!" << std::endl;
+        UpdateRentalS();  // Retry on invalid rental ID
     }
 }
 
@@ -4836,7 +4888,7 @@ void RentalInCustomer() {
         cout << "\n";
         cout << setw(68) << "2. Logout.\n";
         cout << "\n";
-        cout << setw(68) << "Your choice (1,2,3): ";
+        cout << setw(68) << "Your choice (1 and 2): ";
         int option;
         cin >> option;
 
@@ -5152,87 +5204,38 @@ void Report() {
 
     if (choose == 1) {
         system("cls");
+        std::string filePath = "admin.txt"; // Path to the admin file
         welcomeHeader(filePath);
-
+        // Prompt the user for start date and end date
         std::string startDate, endDate;
-        std::cout << "\n\n" << std::setw(71) << "Enter start date (YYYY-MM-DD): ";
+        cout << "\n\n";
+        std::cout << setw(71) << "Enter start date (YYYY-MM-DD): ";
         std::cin >> startDate;
-
-        std::cout << "\n" << std::setw(71) << "Enter end date (YYYY-MM-DD): ";
+        cout << "\n";
+        std::cout << setw(71) << "Enter end date (YYYY-MM-DD): ";
         std::cin >> endDate;
-        std::cout << "\n\n";
-
-        // Calculate sales revenue
-        if (!calculateSalesRevenueByDateRange(conn, startDate, endDate)) {
-            std::cerr << "Error calculating sales revenue\n";
-            mysql_close(conn);
-            return;
-        }
-
-        // Generate revenue graph (Text-based bar chart)
-        std::string query = "SELECT DAY(Rent_Date), SUM(TotalPrice) FROM rent "
-            "WHERE Rent_Date BETWEEN '" + startDate + "' AND '" + endDate + "' "
-            "GROUP BY DAY(Rent_Date) ORDER BY DAY(Rent_Date)";
-
-        if (mysql_query(conn, query.c_str())) {
-            std::cerr << "Error executing query: " << mysql_error(conn) << std::endl;
-            mysql_close(conn);
-            return;
-        }
-
-        MYSQL_RES* result = mysql_store_result(conn);
-        if (!result) {
-            std::cerr << "Error fetching result: " << mysql_error(conn) << std::endl;
-            mysql_close(conn);
-            return;
-        }
-
-        // Find the maximum revenue to scale bars proportionally
-        double maxRevenue = 0.0;
-        MYSQL_ROW row;
-        while ((row = mysql_fetch_row(result))) {
-            double revenue = std::stod(row[1]);
-            if (revenue > maxRevenue) {
-                maxRevenue = revenue;
-            }
-        }
-
-        // Free the result set and store the data again
-        mysql_free_result(result);
-        result = mysql_store_result(conn);  // Re-fetch the result
-
-        // Print the graph header
-        std::cout << "\nRevenue Graph for " << startDate << " to " << endDate << ":\n";
-        std::cout << "--------------------------------------------\n";
-
-        const int maxBarLength = 50;  // Max length of the bar in characters
-        while ((row = mysql_fetch_row(result))) {
-            int day = std::stoi(row[0]);
-            double revenue = std::stod(row[1]);
-
-            // Scale the revenue to the bar length
-            int barLength = static_cast<int>((revenue / maxRevenue) * maxBarLength);
-
-            // Print the day, the bar, and the revenue
-            std::cout << "Day " << std::setw(2) << day << ": "
-                << std::string(barLength, '*') << " "
-                << std::fixed << std::setprecision(2) << revenue << "\n";
-        }
-
-        // Free the result set
-        mysql_free_result(result);
-
-        // Ask if the user wants to continue
-        char choose;
-        std::cout << "\n\n" << std::setw(70) << "Continue? (y/n): ";
-        std::cin >> choose;
-
-        if (choose == 'y' || choose == 'Y') {
-            Report();
+        
+        cout << "\n";
+        if (calculateSalesRevenueByDateRange(conn, startDate, endDate)) {
+            cout << "\n";
+            std::cout << setw(78) << "Sales revenue calculation successful" << std::endl;
         }
         else {
+            std::cerr << "Sales revenue calculation failed" << std::endl;
+        }
+        char choose;
+        cout << endl << setw(70) << "Continue ? (y/n): ";
+        cin >> choose;
+
+        if (choose == 'y' || choose == 'Y')
+        {
+            Report();
+        }
+        else
+        {
             AdminMenu();
         }
+
     }
     else if (choose == 2) {
         system("cls");
